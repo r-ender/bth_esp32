@@ -1,0 +1,922 @@
+ESP32-C3-DevKit-M
+
+INstallation:
+1.) prerequesites
+sudo apt-get install git wget flex bison gperf python3 python3-pip python3-venv cmake ninja-build ccache libffi-dev libssl-dev dfu-util libusb-1.0-0
+
+2.) Get ESP-IDF
+git clone -b v5.3 --recursive https://github.com/espressif/esp-idf.git
+
+3.) Setup Toolchain
+cd ~/esp/esp-idf
+./install.sh esp32c3
+( The scripts introduced in this step install compilation tools required by ESP-IDF inside the user home directory: $HOME/.espressif on Linux. )
+
+4.) Set up the Environment Variables
+The installed tools are not yet added to the PATH environment variable. To make the tools usable from the command line, some environment variables must be set. 
+In the terminal where you are going to use ESP-IDF, run:
+. $HOME/esp/esp-idf/export.sh
+
+outüut:
+rolando@RolandoTestPC:~/riscv/esp-idf$ . ./export.sh 
+Setting IDF_PATH to '/home/rolando/riscv/esp-idf'
+Detecting the Python interpreter
+Checking "python3" ...
+Python 3.10.12
+"python3" has been detected
+Checking Python compatibility
+Checking other ESP-IDF version.
+Adding ESP-IDF tools to PATH...
+Checking if Python packages are up to date...
+Constraint file: /home/rolando/.espressif/espidf.constraints.v5.3.txt
+Requirement files:
+ - /home/rolando/riscv/esp-idf/tools/requirements/requirements.core.txt
+Python being checked: /home/rolando/.espressif/python_env/idf5.3_py3.10_env/bin/python
+Python requirements are satisfied.
+Added the following directories to PATH:
+  /home/rolando/riscv/esp-idf/components/espcoredump
+  /home/rolando/riscv/esp-idf/components/partition_table
+  /home/rolando/riscv/esp-idf/components/app_update
+  /home/rolando/.espressif/tools/riscv32-esp-elf-gdb/14.2_20240403/riscv32-esp-elf-gdb/bin
+  /home/rolando/.espressif/tools/riscv32-esp-elf/esp-13.2.0_20240530/riscv32-esp-elf/bin
+  /home/rolando/.espressif/tools/openocd-esp32/v0.12.0-esp32-20240318/openocd-esp32/bin
+  /home/rolando/.espressif/tools/riscv32-esp-elf-gdb/14.2_20240403/riscv32-esp-elf-gdb/bin
+  /home/rolando/.espressif/tools/riscv32-esp-elf/esp-13.2.0_20240530/riscv32-esp-elf/bin
+  /home/rolando/.espressif/tools/openocd-esp32/v0.12.0-esp32-20240318/openocd-esp32/bin
+  /home/rolando/.espressif/python_env/idf5.3_py3.10_env/bin
+  /home/rolando/riscv/esp-idf/tools
+Done! You can now compile ESP-IDF projects.
+Go to the project directory and run:
+
+  idf.py build
+
+
+5.) start your first project.
+Copy the project get-started/hello_world to ~/esp directory
+
+- Now connect your ESP32-C3 board to the computer and check under which serial port the board is visible.
+
+Bus 001 Device 017: ID 1a86:7523 QinHeng Electronics CH340 serial converter
+
+[111513.108247] usb 1-3: new full-speed USB device number 18 using xhci_hcd
+[111513.257969] usb 1-3: New USB device found, idVendor=1a86, idProduct=7523, bcdDevice= 2.64
+[111513.257989] usb 1-3: New USB device strings: Mfr=0, Product=2, SerialNumber=0
+[111513.257997] usb 1-3: Product: USB Serial
+[111513.260562] ch341 1-3:1.0: ch341-uart converter detected
+[111513.261328] usb 1-3: ch341-uart converter now attached to ttyUSB0
+[111513.877806] input: BRLTTY 6.4 Linux Screen Driver Keyboard as /devices/virtual/input/input22
+[111513.997484] usb 1-3: usbfs: interface 0 claimed by ch341 while 'brltty' sets config #1
+[111513.998261] ch341-uart ttyUSB0: ch341-uart converter now disconnected from ttyUSB0
+[111513.998283] ch341 1-3:1.0: device disconnected
+
+rolando@RolandoTestPC:~/riscv/hello_world$ lsmod | grep ch
+ch341                  24576  0
+
+sudo apt remove brltty	(das ist braille-tty also Blinden-INput)
+
+[111818.626727] usb 1-3: Product: USB Serial
+[111818.629043] ch341 1-3:1.0: ch341-uart converter detected
+[111818.631909] usb 1-3: ch341-uart converter now attached to ttyUSB0
+
+
+6.) Navigate to your hello_world directory, set ESP32-C3 as the target, and run the project configuration utility menuconfig.
+Note that existing builds and configurations in the project, if any, are cleared and initialized in this process.
+
+cd ~/esp/hello_world
+idf.py set-target esp32c3
+idf.py menuconfig
+
+rolando@RolandoTestPC:~/riscv/hello_world$ idf.py set-target esp32c3
+Adding "set-target"'s dependency "fullclean" to list of commands with default set of options.
+Executing action: fullclean
+Build directory '/home/rolando/riscv/hello_world/build' not found. Nothing to clean.
+Executing action: set-target
+Set Target to: esp32c3, new sdkconfig will be created.
+Running cmake in directory /home/rolando/riscv/hello_world/build
+Executing "cmake -G Ninja -DPYTHON_DEPS_CHECKED=1 -DPYTHON=/home/rolando/.espressif/python_env/idf5.3_py3.10_env/bin/python -DESP_PLATFORM=1 -DIDF_TARGET=esp32c3 -DCCACHE_ENABLE=0 /home/rolando/riscv/hello_world"...
+-- Found Git: /usr/bin/git (found version "2.34.1") 
+-- The C compiler identification is GNU 13.2.0
+-- The CXX compiler identification is GNU 13.2.0
+-- The ASM compiler identification is GNU
+-- Found assembler: /home/rolando/.espressif/tools/riscv32-esp-elf/esp-13.2.0_20240530/riscv32-esp-elf/bin/riscv32-esp-elf-gcc
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /home/rolando/.espressif/tools/riscv32-esp-elf/esp-13.2.0_20240530/riscv32-esp-elf/bin/riscv32-esp-elf-gcc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /home/rolando/.espressif/tools/riscv32-esp-elf/esp-13.2.0_20240530/riscv32-esp-elf/bin/riscv32-esp-elf-g++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- git describe returned 'fatal: bad revision 'HEAD''
+-- Could not use 'git describe' to determine PROJECT_VER.
+-- Building ESP-IDF components for target esp32c3
+-- Project sdkconfig file /home/rolando/riscv/hello_world/sdkconfig
+-- Adding linker script /home/rolando/riscv/esp-idf/components/riscv/ld/rom.api.ld
+-- Found Python3: /home/rolando/.espressif/python_env/idf5.3_py3.10_env/bin/python (found version "3.10.12") found components: Interpreter 
+-- Looking for pthread.h
+-- Looking for pthread.h - found
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE  
+-- Performing Test C_COMPILER_SUPPORTS_WFORMAT_SIGNEDNESS
+-- Performing Test C_COMPILER_SUPPORTS_WFORMAT_SIGNEDNESS - Success
+-- App "hello_world" version: 1
+-- Adding linker script /home/rolando/riscv/hello_world/build/esp-idf/esp_system/ld/memory.ld
+-- Adding linker script /home/rolando/riscv/hello_world/build/esp-idf/esp_system/ld/sections.ld.in
+-- Adding linker script /home/rolando/riscv/esp-idf/components/esp_rom/esp32c3/ld/esp32c3.rom.ld
+-- Adding linker script /home/rolando/riscv/esp-idf/components/esp_rom/esp32c3/ld/esp32c3.rom.api.ld
+-- Adding linker script /home/rolando/riscv/esp-idf/components/esp_rom/esp32c3/ld/esp32c3.rom.libgcc.ld
+-- Adding linker script /home/rolando/riscv/esp-idf/components/esp_rom/esp32c3/ld/esp32c3.rom.version.ld
+-- Adding linker script /home/rolando/riscv/esp-idf/components/esp_rom/esp32c3/ld/esp32c3.rom.eco3.ld
+-- Adding linker script /home/rolando/riscv/esp-idf/components/esp_rom/esp32c3/ld/esp32c3.rom.newlib.ld
+-- Adding linker script /home/rolando/riscv/esp-idf/components/soc/esp32c3/ld/esp32c3.peripherals.ld
+-- Components: app_trace app_update bootloader bootloader_support bt cmock console cxx driver efuse esp-tls esp_adc esp_app_format esp_bootloader_format esp_coex esp_common esp_driver_ana_cmpr esp_driver_cam esp_driver_dac esp_driver_gpio esp_driver_gptimer esp_driver_i2c esp_driver_i2s esp_driver_isp esp_driver_jpeg esp_driver_ledc esp_driver_mcpwm esp_driver_parlio esp_driver_pcnt esp_driver_ppa esp_driver_rmt esp_driver_sdio esp_driver_sdm esp_driver_sdmmc esp_driver_sdspi esp_driver_spi esp_driver_tsens esp_driver_uart esp_driver_usb_serial_jtag esp_eth esp_event esp_gdbstub esp_hid esp_http_client esp_http_server esp_https_ota esp_https_server esp_hw_support esp_lcd esp_local_ctrl esp_mm esp_netif esp_netif_stack esp_partition esp_phy esp_pm esp_psram esp_ringbuf esp_rom esp_system esp_timer esp_vfs_console esp_wifi espcoredump esptool_py fatfs freertos hal heap http_parser idf_test ieee802154 json log lwip main mbedtls mqtt newlib nvs_flash nvs_sec_provider openthread partition_table protobuf-c protocomm pthread riscv sdmmc soc spi_flash spiffs tcp_transport ulp unity usb vfs wear_levelling wifi_provisioning wpa_supplicant
+-- Component paths: /home/rolando/riscv/esp-idf/components/app_trace /home/rolando/riscv/esp-idf/components/app_update /home/rolando/riscv/esp-idf/components/bootloader /home/rolando/riscv/esp-idf/components/bootloader_support /home/rolando/riscv/esp-idf/components/bt /home/rolando/riscv/esp-idf/components/cmock /home/rolando/riscv/esp-idf/components/console /home/rolando/riscv/esp-idf/components/cxx /home/rolando/riscv/esp-idf/components/driver /home/rolando/riscv/esp-idf/components/efuse /home/rolando/riscv/esp-idf/components/esp-tls /home/rolando/riscv/esp-idf/components/esp_adc /home/rolando/riscv/esp-idf/components/esp_app_format /home/rolando/riscv/esp-idf/components/esp_bootloader_format /home/rolando/riscv/esp-idf/components/esp_coex /home/rolando/riscv/esp-idf/components/esp_common /home/rolando/riscv/esp-idf/components/esp_driver_ana_cmpr /home/rolando/riscv/esp-idf/components/esp_driver_cam /home/rolando/riscv/esp-idf/components/esp_driver_dac /home/rolando/riscv/esp-idf/components/esp_driver_gpio /home/rolando/riscv/esp-idf/components/esp_driver_gptimer /home/rolando/riscv/esp-idf/components/esp_driver_i2c /home/rolando/riscv/esp-idf/components/esp_driver_i2s /home/rolando/riscv/esp-idf/components/esp_driver_isp /home/rolando/riscv/esp-idf/components/esp_driver_jpeg /home/rolando/riscv/esp-idf/components/esp_driver_ledc /home/rolando/riscv/esp-idf/components/esp_driver_mcpwm /home/rolando/riscv/esp-idf/components/esp_driver_parlio /home/rolando/riscv/esp-idf/components/esp_driver_pcnt /home/rolando/riscv/esp-idf/components/esp_driver_ppa /home/rolando/riscv/esp-idf/components/esp_driver_rmt /home/rolando/riscv/esp-idf/components/esp_driver_sdio /home/rolando/riscv/esp-idf/components/esp_driver_sdm /home/rolando/riscv/esp-idf/components/esp_driver_sdmmc /home/rolando/riscv/esp-idf/components/esp_driver_sdspi /home/rolando/riscv/esp-idf/components/esp_driver_spi /home/rolando/riscv/esp-idf/components/esp_driver_tsens /home/rolando/riscv/esp-idf/components/esp_driver_uart /home/rolando/riscv/esp-idf/components/esp_driver_usb_serial_jtag /home/rolando/riscv/esp-idf/components/esp_eth /home/rolando/riscv/esp-idf/components/esp_event /home/rolando/riscv/esp-idf/components/esp_gdbstub /home/rolando/riscv/esp-idf/components/esp_hid /home/rolando/riscv/esp-idf/components/esp_http_client /home/rolando/riscv/esp-idf/components/esp_http_server /home/rolando/riscv/esp-idf/components/esp_https_ota /home/rolando/riscv/esp-idf/components/esp_https_server /home/rolando/riscv/esp-idf/components/esp_hw_support /home/rolando/riscv/esp-idf/components/esp_lcd /home/rolando/riscv/esp-idf/components/esp_local_ctrl /home/rolando/riscv/esp-idf/components/esp_mm /home/rolando/riscv/esp-idf/components/esp_netif /home/rolando/riscv/esp-idf/components/esp_netif_stack /home/rolando/riscv/esp-idf/components/esp_partition /home/rolando/riscv/esp-idf/components/esp_phy /home/rolando/riscv/esp-idf/components/esp_pm /home/rolando/riscv/esp-idf/components/esp_psram /home/rolando/riscv/esp-idf/components/esp_ringbuf /home/rolando/riscv/esp-idf/components/esp_rom /home/rolando/riscv/esp-idf/components/esp_system /home/rolando/riscv/esp-idf/components/esp_timer /home/rolando/riscv/esp-idf/components/esp_vfs_console /home/rolando/riscv/esp-idf/components/esp_wifi /home/rolando/riscv/esp-idf/components/espcoredump /home/rolando/riscv/esp-idf/components/esptool_py /home/rolando/riscv/esp-idf/components/fatfs /home/rolando/riscv/esp-idf/components/freertos /home/rolando/riscv/esp-idf/components/hal /home/rolando/riscv/esp-idf/components/heap /home/rolando/riscv/esp-idf/components/http_parser /home/rolando/riscv/esp-idf/components/idf_test /home/rolando/riscv/esp-idf/components/ieee802154 /home/rolando/riscv/esp-idf/components/json /home/rolando/riscv/esp-idf/components/log /home/rolando/riscv/esp-idf/components/lwip /home/rolando/riscv/hello_world/main /home/rolando/riscv/esp-idf/components/mbedtls /home/rolando/riscv/esp-idf/components/mqtt /home/rolando/riscv/esp-idf/components/newlib /home/rolando/riscv/esp-idf/components/nvs_flash /home/rolando/riscv/esp-idf/components/nvs_sec_provider /home/rolando/riscv/esp-idf/components/openthread /home/rolando/riscv/esp-idf/components/partition_table /home/rolando/riscv/esp-idf/components/protobuf-c /home/rolando/riscv/esp-idf/components/protocomm /home/rolando/riscv/esp-idf/components/pthread /home/rolando/riscv/esp-idf/components/riscv /home/rolando/riscv/esp-idf/components/sdmmc /home/rolando/riscv/esp-idf/components/soc /home/rolando/riscv/esp-idf/components/spi_flash /home/rolando/riscv/esp-idf/components/spiffs /home/rolando/riscv/esp-idf/components/tcp_transport /home/rolando/riscv/esp-idf/components/ulp /home/rolando/riscv/esp-idf/components/unity /home/rolando/riscv/esp-idf/components/usb /home/rolando/riscv/esp-idf/components/vfs /home/rolando/riscv/esp-idf/components/wear_levelling /home/rolando/riscv/esp-idf/components/wifi_provisioning /home/rolando/riscv/esp-idf/components/wpa_supplicant
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/rolando/riscv/hello_world/build
+
+( You are using this menu to set up project specific variables, e.g., Wi-Fi network name and password, the processor speed, etc. Setting up the project with 
+menuconfig may be skipped for "hello_world", since this example runs with default configuration. )
+
+
+7.) Build the project by running: idf.py build
+
+( This command compiles the application and all ESP-IDF components, then it generates the bootloader, partition table, and application binaries.
+If there are no errors, the build finishes by generating the firmware binary .bin files )
+
+8.) Flash onto device:  idf.py -p PORT flash --> idf.py -p /dev/ttyUSB0 flash
+
+rolando@RolandoTestPC:~/riscv/hello_world$ sudo chmod 777 /dev/ttyUSB0
+rolando@RolandoTestPC:~/riscv/hello_world$ sudo chown $USER:$USER /dev/ttyUSB0
+
+rolando@RolandoTestPC:~/riscv/hello_world$ idf.py flash
+Executing action: flash
+Serial port /dev/ttyUSB0
+Connecting....
+Detecting chip type... ESP32-C3
+Running ninja in directory /home/rolando/riscv/hello_world/build
+Executing "ninja flash"...
+[1/5] cd /home/rolando/riscv/hello_world/build/esp-idf/esptool_py && ...ition-table.bin /home/rolando/riscv/hello_world/build/hello_world.bin
+hello_world.bin binary size 0x2ab00 bytes. Smallest app partition is 0x100000 bytes. 0xd5500 bytes (83%) free.
+[1/1] cd /home/rolando/riscv/hello_world/build/bootloader/esp-idf/esp...r 0x0 /home/rolando/riscv/hello_world/build/bootloader/bootloader.bin
+Bootloader binary size 0x5180 bytes. 0x2e80 bytes (36%) free.
+[2/3] cd /home/rolando/riscv/esp-idf/components/esptool_py && /usr/bi...ome/rolando/riscv/esp-idf/components/esptool_py/run_serial_tool.cmake
+esptool.py --chip esp32c3 -p /dev/ttyUSB0 -b 460800 --before=default_reset --after=hard_reset write_flash --flash_mode dio --flash_freq 80m --flash_size 2MB 0x0 bootloader/bootloader.bin 0x10000 hello_world.bin 0x8000 partition_table/partition-table.bin
+esptool.py v4.8.dev4
+Serial port /dev/ttyUSB0
+Connecting....
+Chip is ESP32-C3 (QFN32) (revision v0.4)
+Features: WiFi, BLE, Embedded Flash 4MB (XMC)
+Crystal is 40MHz
+MAC: 84:fc:e6:01:1a:04
+Uploading stub...
+Running stub...
+Stub running...
+Changing baud rate to 460800
+Changed.
+Configuring flash size...
+Flash will be erased from 0x00000000 to 0x00005fff...
+Flash will be erased from 0x00010000 to 0x0003afff...
+Flash will be erased from 0x00008000 to 0x00008fff...
+SHA digest in image updated
+Compressed 20864 bytes to 12758...
+Writing at 0x00000000... (100 %)
+Wrote 20864 bytes (12758 compressed) at 0x00000000 in 0.6 seconds (effective 257.8 kbit/s)...
+Hash of data verified.
+Compressed 174848 bytes to 91898...
+Writing at 0x00036197... (100 %)
+Wrote 174848 bytes (91898 compressed) at 0x00010000 in 3.1 seconds (effective 452.1 kbit/s)...
+Hash of data verified.
+Compressed 3072 bytes to 103...
+Writing at 0x00008000... (100 %)
+Wrote 3072 bytes (103 compressed) at 0x00008000 in 0.1 seconds (effective 440.4 kbit/s)...
+Hash of data verified.
+
+Leaving...
+Hard resetting via RTS pin...
+Done
+
+
+9.) monitor output  ($ idf.py -p <PORT> monitor )
+rolando@RolandoTestPC:~/riscv/hello_world$ idf.py monitor
+Executing action: monitor
+Serial port /dev/ttyUSB0
+Connecting....
+Detecting chip type... ESP32-C3
+Running idf_monitor in directory /home/rolando/riscv/hello_world
+Executing "/home/rolando/.espressif/python_env/idf5.3_py3.10_env/bin/python /home/rolando/riscv/esp-idf/tools/idf_monitor.py -p /dev/ttyUSB0 -b 115200 --toolchain-prefix riscv32-esp-elf- --target esp32c3 --revision 3 --decode-panic backtrace /home/rolando/riscv/hello_world/build/hello_world.elf -m '/home/rolando/.espressif/python_env/idf5.3_py3.10_env/bin/python' '/home/rolando/riscv/esp-idf/tools/idf.py'"...
+--- esp-idf-monitor 1.4.0 on /dev/ttyUSB0 115200 ---
+--- Quit: Ctrl+] | Menu: Ctrl+T | Help: Ctrl+T followed by Ctrl+H ---
+ESP-ROM:esp32c3-api1-20210207
+Build:Feb  7 2021
+rst:0x1 (POWERON),boot:0xd (SPI_FAST_FLASH_BOOT)
+SPIWP:0xee
+mode:DIO, clock div:1
+load:0x3fcd5820,len:0x1738
+load:0x403cc710,len:0xb9c
+load:0x403ce710,len:0x2e4c
+entry 0x403cc71a
+I (30) boot: ESP-IDF v5.3 2nd stage bootloader
+I (30) boot: compile time Aug 20 2024 22:24:47
+I (30) boot: chip revision: v0.4
+I (33) boot.esp32c3: SPI Speed      : 80MHz
+I (38) boot.esp32c3: SPI Mode       : DIO
+I (43) boot.esp32c3: SPI Flash Size : 2MB
+I (47) boot: Enabling RNG early entropy source...
+I (53) boot: Partition Table:
+I (56) boot: ## Label            Usage          Type ST Offset   Length
+I (64) boot:  0 nvs              WiFi data        01 02 00009000 00006000
+I (71) boot:  1 phy_init         RF data          01 01 0000f000 00001000
+I (78) boot:  2 factory          factory app      00 00 00010000 00100000
+I (86) boot: End of partition table
+I (90) esp_image: segment 0: paddr=00010020 vaddr=3c020020 size=08b34h ( 35636) map
+I (104) esp_image: segment 1: paddr=00018b5c vaddr=3fc8b400 size=01354h (  4948) load
+I (108) esp_image: segment 2: paddr=00019eb8 vaddr=40380000 size=06160h ( 24928) load
+I (120) esp_image: segment 3: paddr=00020020 vaddr=42000020 size=1587ch ( 88188) map
+I (138) esp_image: segment 4: paddr=000358a4 vaddr=40386160 size=0522ch ( 21036) load
+I (145) boot: Loaded app from partition at offset 0x10000
+I (145) boot: Disabling RNG early entropy source...
+I (158) cpu_start: Unicore app
+I (166) cpu_start: Pro cpu start user code
+I (166) cpu_start: cpu freq: 160000000 Hz
+I (167) app_init: Application information:
+I (169) app_init: Project name:     hello_world
+I (175) app_init: App version:      1
+I (179) app_init: Compile time:     Aug 20 2024 22:24:37
+I (185) app_init: ELF file SHA256:  0450af75a...
+I (190) app_init: ESP-IDF:          v5.3
+I (195) efuse_init: Min chip rev:     v0.3
+I (200) efuse_init: Max chip rev:     v1.99 
+I (205) efuse_init: Chip rev:         v0.4
+I (209) heap_init: Initializing. RAM available for dynamic allocation:
+I (217) heap_init: At 3FC8D600 len 00032A00 (202 KiB): RAM
+I (223) heap_init: At 3FCC0000 len 0001C710 (113 KiB): Retention RAM
+I (230) heap_init: At 3FCDC710 len 00002950 (10 KiB): Retention RAM
+I (237) heap_init: At 50000200 len 00001DE8 (7 KiB): RTCRAM
+I (244) spi_flash: detected chip: generic
+I (248) spi_flash: flash io: dio
+W (252) spi_flash: Detected size(4096k) larger than the size in the binary image header(2048k). Using the size in the binary image header.
+I (265) sleep: Configure to isolate all GPIO pins in sleep state
+I (271) sleep: Enable automatic switching of GPIO sleep configuration
+I (279) main_task: Started on CPU0
+I (289) main_task: Calling app_main()
+Hello world!
+This is esp32c3 chip with 1 CPU core(s), WiFi/BLE, silicon revision v0.4, 2MB external flash
+Minimum free heap size: 330432 bytes
+Restarting in 10 seconds...
+Restarting in 9 seconds...
+Restarting in 8 seconds...
+Restarting in 7 seconds...
+Restarting in 6 seconds...
+Restarting in 5 seconds...
+Restarting in 4 seconds...
+Restarting in 3 seconds...
+Restarting in 2 seconds...
+Restarting in 1 seconds...
+Restarting in 0 seconds...
+Restarting now.
+ESP-ROM:esp32c3-api1-20210207
+Build:Feb  7 2021
+rst:0xc (RTC_SW_CPU_RST),boot:0xd (SPI_FAST_FLASH_BOOT)
+Saved PC:0x403807ca
+0x403807ca: esp_restart_noos at /home/rolando/riscv/esp-idf/components/esp_system/port/soc/esp32c3/system_internal.c:110
+
+SPIWP:0xee
+mode:DIO, clock div:1
+load:0x3fcd5820,len:0x1738
+load:0x403cc710,len:0xb9c
+load:0x403ce710,len:0x2e4c
+entry 0x403cc71a
+
+
+( You can combine building, flashing and monitoring into one step by running: idf.py -p PORT flash monitor )
+
+
+nachlesen monitoring/debugging:
+https://docs.espressif.com/projects/esp-idf/en/stable/esp32c3/api-guides/tools/idf-monitor.html
+
+build system:  https://docs.espressif.com/projects/esp-idf/en/stable/esp32c3/api-guides/build-system.html#idf-py
+
+9.) to erase flash:
+idf.py -p PORT erase-flash
+
+__________________________________________________________________________________________________________
+
+project hello-world analysieren:
+
+sdkconfig = Automatically generated file. DO NOT EDIT. Espressif IoT Development Framework (ESP-IDF) 5.3.0 Project Configuration
+pytest_hello_world.py = tests beim start mit output bei monitor
+CMakeLists.txt = 
+# The following lines of boilerplate have to be in your project's CMakeLists in this exact order for cmake to work correctly
+cmake_minimum_required(VERSION 3.16)
+
+include($ENV{IDF_PATH}/tools/cmake/project.cmake)
+project(hello_world)
+
+rolando@RolandoTestPC:~/riscv/hello_world/main$ ls
+CMakeLists.txt  hello_world_main.c
+rolando@RolandoTestPC:~/riscv/hello_world/main$ cat CMakeLists.txt 
+idf_component_register(SRCS "hello_world_main.c"
+                    INCLUDE_DIRS "")
+
+in build-Ordner sind config-files und partition-table etc.
+
+
+1.) eigenes Projekt:
+
+Bluetooth range-extender!
+
+LED muss ich selbst kaufen und bei Steckboard anstecken für Debugging ohne Konsole
+
+ --> in datasheet und technical reference ist alles technische zu esp32-c3 beschrieben
+ 
+ --> gdb-debugger wie nutzen ?!	--> https://docs.espressif.com/projects/esp-idf/en/stable/esp32c3/api-guides/tools/qemu.html
+	QEMU installieren:  sudo apt-get install -y libgcrypt20 libglib2.0-0 libpixman-1-0 libsdl2-2.0-0 libslirp0
+				rolando@RolandoTestPC:~/riscv$ python esp-idf/tools/idf_tools.py install qemu-riscv32
+
+			rolando@RolandoTestPC:~/riscv/esp-idf$ . ./export.sh
+			rolando@RolandoTestPC:~/riscv/hello_world$ idf.py qemu monitor
+
+__________________________________________________________________________________________________
+	uint32_t features;       //!< bit mask of CHIP_FEATURE_x feature flags
+} esp_chip_info_t;
+
+PRIu32 = is the format to print unsigned 32-bit integers in decimal format ( Format macro constants defined in header <inttypes.h> )  
+
+--> kein passender example-Folder für bluetooth, darum selbst ein Projekt erstellen nach Vorbild hello_world und evtl an afm orientieren ?!
+	--> macht noch keinen Sinn (erstmal über bluetooth einlesen in manual/datasheet!)
+	
+-----------------------------------------------
+
+es gibt Bluetooth LE PHY:  Bluetooth Low Energy radio and PHY in ESP32-C3 support:
+• 1 Mbps PHY + 2 Mbps PHY for higher data rates
+• coded PHY for longer range (125 Kbps and 500 Kbps)
+• HW Listen before talk (LBT)
+(for more details check frequency/RF in chapter 6)
+
+und Bluetooth LE Link Controller
+Bluetooth Low Energy Link Layer Controller in ESP32-C3 supports:
+• LE advertising extensions, to enhance broadcasting capacity and broadcast more intelligent data
+• multiple advertisement sets
+• simultaneous advertising and scanning
+• multiple connections in simultaneous central and peripheral roles
+• adaptive frequency hopping and channel assessment
+• LE channel selection algorithm #2
+• connection parameter update
+• high duty cycle non-connectable advertising
+• LE privacy 1.2
+• LE data packet length extension
+• link layer extended scanner filter policies
+• low duty cycle directed advertising
+• link layer encryption
+• LE Ping
+
+
+Bluetooth LE can only work when CPU_CLK uses PLL_CLK as its clock source. Suspending
+PLL_CLK requires that Wi-Fi and Bluetooth LE have entered low-power mode first.
+LOW_POWER_CLK uses XTAL32K_CLK, XTAL_CLK, RC_FAST_CLK or RTC_SLOW_CLK (the low clock selected
+by RTC) as its clock source for Wi-Fi and Bluetooth LE in low-power mode.
+
+• High-speed ADC is enabled automatically when the Wi-Fi or Bluetooth modules is enabled.
+
+	--> nicht so viel neue erkenntnis, selbst erarbeiten !
+	
+---------------------------------------------------------------------------------
+
+
+Note: To use examples in this directory, you need to have Bluetooth enabled in configuration and Bluedroid selected as the host stack
+	--> bluetooth-configuration beduetet vemrutlich: (chip_info.features & CHIP_FEATURE_BT) ? "BT" : "",
+           						 (chip_info.features & CHIP_FEATURE_BLE) ? "BLE" : "",
+
+es wird das Bluetooth-Modul in zwei Typen unterteilt: Classic Bluetooth (BR/EDR) und Bluetooth Low Energy (BLE). Es gibt viele Profile für klassisches Bluetooth und BLE: SPP, GATT, A2DP, AVRCP, HFP usw. Für die Datenübertragung sind SPP und GATT die am häufigsten verwendeten Profile für klassisches Bluetooth bzw. BLE.
+
+SPP (Serial Port Profile) ist ein klassisches Bluetooth-Profil. SPP definiert die Anforderungen an Bluetooth-Geräte, die zum Einrichten emulierter serieller Kabelverbindungen mithilfe von RFCOMM zwischen zwei Peer-Geräten erforderlich sind. Die Anforderungen werden in Bezug auf die für Anwendungen bereitgestellten Dienste ausgedrückt und durch die Definition der Funktionen und Verfahren, die für die Interoperabilität zwischen Bluetooth-Geräten erforderlich sind.
+
+GATT (Generic Attribute Profile) ist ein BLE-Profil, es definiert Spezifikationen für zwei BLE-Geräte, die über Service und Characteristic kommunizieren sollen. Die beiden Parteien der GATT-Kommunikation sind die Client/Server-Beziehung, das Peripheriegerät ist der GATT-Server, die Zentrale ist der GATT-Client,
+
+Das Generic Attribute Profile (GATT) definiert ein Service-Framework unter Verwendung des Attribute Protocol. Dieser Rahmen definiert Verfahren und Formate von Diensten und deren Eigenschaften. Die definierten Verfahren umfassen das Erkennen, Lesen, Schreiben, Benachrichtigen und Anzeigen von Merkmalen sowie das Konfigurieren der Übertragung von Merkmalen. In GATT sind der Server und der Client zwei verschiedene Arten von GATT-Rollen, es ist sinnvoll, sie zu trennen.
+
+Ein GATT-Server ist ein Gerät, das Attributdaten lokal speichert und Datenzugriffsmethoden für einen über BLE gekoppelten Remote-GATT-Client bereitstellt.
+Ein GATT-Client ist ein Gerät, das über Lese-, Schreib-, Benachrichtigungs- oder Anzeigevorgänge auf Daten auf einem über BLE gekoppelten Remote-GATT-Server zugreift. 
+Sobald zwei Geräte gekoppelt sind, kann jedes Gerät sowohl als GATT-Server als auch als GATT-Client fungieren.
+
+Client devices access remote resources over a BLE link using the GATT protocol. Usually, the central is the client (but not necessarily).
+Server devices have a local database and access control methods and provide resources to the remote client. Usually, the peripheral is the server (but not necessarily).
+You can use read, write, notify, or indicate operations to move data between the client and the server.
+Read and write operations are requested by the client and the server responds (or acknowledges).
+Notify and indicate operations are enabled by the client but initiated by the server, providing a way to push data to the client.
+Notifications are unacknowledged, while indications are acknowledged. Notifications are therefore faster but less reliable.
+
+    GATT client - a device which accesses data on the remote GATT server via read, write, notify, or indicate operations
+
+    GATT server - a device which stores data locally and provides data access methods to a remote GATT client
+    
+    While it is most common for the peripheral device to be the GATT server and the central device to be the GATT client, this is not required. The GATT functionality of a device is logically separate from the central/peripheral role. The central/peripheral roles control how the BLE radio connection is managed while the client/server roles are dictated by the storage and flow of data.
+    
+    The structure and flow of data is always defined on the GATT server. The client uses whatever is exposed by the server.
+    
+
+        
+Praxistest aus: WBT101-06A-ClassicBluetooth-Basic.pdf
+This section is focused on the simplest Bluetooth
+connection, one Master (Android, Mac or PC) and one Slave (your WICED Bluetooth Device). By the end
+you should understand Inquiry, Page, Pair, Bond, SDP, L2CAP, RFCOMM and the Serial Port Profile (SPP).
+
+test mit ble-spp_client:
+vor build:
+source esp-idf/export.sh
+
+idf.py set-target esp32c3
+idf.py menuconfig	--> zum Einstellen der Bluetooth-Konfiguration
+
+( qemu über anderes Terminal-Prozess stoppen, falls es nicht reagiert  --> sudo ps aux | grep qemu + sudo kill -9 xxx "
+
+	--> mit qemu und echten output anschauen in qemu_bootoutput
+		--> next: funktionen durchgehen wie zb app_init, efuse_init etc.
+
+programmablauf:
+I (391) main_task: Calling app_main()
+ --- this is spp_client app_main ---
+I (401) phy_init: phy_version 1180,01f2a49,Jun  4 2024,16:34:25
+I (451) GATTC_SPP_DEMO: app_main init bluetooth
+ --- this is spp_client ble_client_appRegister ---
+I (461) GATTC_SPP_DEMO: register callback
+ --- this is spp_client esp_gattc_cb ---
+I (461) GATTC_SPP_DEMO: EVT 0, gattc if 3
+ --- this is spp_client gattc_profile_event_handler ---
+I (471) GATTC_SPP_DEMO: REG EVT, set scan params
+ --- this is spp_client esp_gap_cb ---
+I (481) GATTC_SPP_DEMO: Enable Ble Scan:during time ffff minutes.
+ --- this is spp_client esp_gap_cb ---
+I (491) GATTC_SPP_DEMO: Scan start successfully
+ --- this is spp_ --- this is spp_client uart_task ---
+I (511) main_task: Returned from app_main()
+ --- this is spp_client esp_gap_cb ---
+I (521) GATTC_SPP_DEMO: 0a 3b bc bc 35 3b  
+
+
+* `esp_bt.h`: implements BT controller and VHCI configuration procedures from the host side.
+ * `esp_bt_main.h`: implements initialization and enabling of the Bluedroid stack.
+ * `esp_gap_ble_api.h`: implements GAP configuration, such as advertising and connection parameters.
+ * `esp_gatts_api.h`: implements GATT configuration, such as creating services and characteristics.
+
+The entry point to this example is the app_main() function:
+esp_bt_controller_config_t bt_cfg = BT_CONTROLLER_INIT_CONFIG_DEFAULT();
+
+The main function starts by initializing the non-volatile storage library. This library allows tosave key-value pairs in flash memory and is used by some components such as the Wi-Fi library to save the SSID and password:  
+nvs_flash_init();
+
+The main function also initializes the BT controller by first creating a BT controller configuration structure named `esp_bt_controller_config_t` with default settings generated by the `BT_CONTROLLER_INIT_CONFIG_DEFAULT()` macro.
+The BT controller implements the Host Controller Interface (HCI) on the controller side, the Link Layer (LL) and the Physical Layer (PHY).The BT Controller code is exposed as a library that interacts with underlying Bluetooth stack. The controller configuration includes setting the BT controller stack size, priority and HCI baud rate. With the settings created, the BT controller is initialized and enabled with the `esp_bt_controller_init()` function: 
+esp_bt_controller_config_t bt_cfg = BT_CONTROLLER_INIT_CONFIG_DEFAULT();
+ret = esp_bt_controller_init(&bt_cfg);
+
+Next, the controller is enabled in BLE Mode.
+ret = esp_bt_controller_enable(ESP_BT_MODE_BLE);
+
+<
+The controller should be enabled in `ESP_BT_MODE_BTDM`, if you want to use the dual mode (BLE + BT).
+
+There are four Bluetooth modes supported:
+
+1. `ESP_BT_MODE_IDLE`: Bluetooth not running
+2. `ESP_BT_MODE_BLE`: BLE mode
+3. `ESP_BT_MODE_CLASSIC_BT`: BT Classic mode
+4. `ESP_BT_MODE_BTDM`: Dual mode (BLE + BT Classic)
+>
+
+After the initialization of the BT controller, the Bluedroid stack, which includes the common definitions and APIs for both BT Classic and BLE, is initialized and enabled by using:
+ret = esp_bluedroid_init();
+ret = esp_bluedroid_enable();
+
+
+The Bluetooth stack is up and running at this point in the program flow, however the functionality of the application has not been defined yet. The functionality is defined by reacting to events such as what happens when another device tries to read or write parameters and establish a connection.
+
+
+danach aufrufen der inline-function "ble_client_appRegister()" :
+ESP_LOGI(GATTC_TAG, "register callback");	--> logging output "(461) GATTC_SPP_DEMO: register callback" / #define GATTC_TAG  "GATTC_SPP_DEMO"
+
+User need to define GAP and GATT handlers. The application needs
+to register a callback function for each event handler in order to let the application know which functions are going to handle the GAP and GATT events:
+esp_ble_gap_register_callback(esp_gap_cb) 	//register the scan callback function to the gap module
+					//The functions  `esp_gap_cb` handle all the events that are pushed to the application from the BLE stack.
+## Setting GAP Parameters
+The register application event is the first one that is triggered during the lifetime of the program, this example uses the Profile A GATT event handle to configure the advertising parameters upon registration.
+
+
+esp_ble_gattc_register_callback(esp_gattc_cb) 	//register the callback function to the gattc module
+
+esp_gap_cb wird aber erst nach gattc_cb aufgerufen ?!
+
+zu event-handler static void esp_gattc_cb:
+		ESP_LOGI(GATTC_TAG, "EVT %d, gattc if %d", event, gattc_if); --> "(461) GATTC_SPP_DEMO: EVT 0, gattc if 3"
+		
+--- this is spp_client gattc_profile_event_handler ---
+
+--->  die genaue Abfolge von esp_ble_gap_register_callback(esp_gap_cb) und esp_ble_gattc_register_callback(esp_gattc_cb) klären,
+	und GATT + GAP verstehen
+	
+The functions `esp_gap_cb()` and `esp_gattc_cb()` handle all the events generated by the BLE stack.
+
+<
+BLE-stack: (gut erklärt unter https://software-dl.ti.com/lprf/simplelink_cc2640r2_sdk/1.00.00.22/exports/docs/blestack/html/ble-stack/index.html#introduction )
+The Bluetooth low energy protocol stack (or protocol stack) consists of the controller and the host. This separation of controller and host derives from the implementation of classic Bluetooth BR/EDR devices, where the two sections are implemented separately. Any profiles and applications sit on top of the GAP and GATT layers of the protocol stack.
+
+luez und Bluedroid sind zwei verschiedene BLuetooth-Arten
+The primary difference of implementation details between Bluedroid and Bluez is that HCI layer was included in Bluedroid. HCI, short for host control interface, is the communication protocol between host stack and control stack, it has an implementation in Linux kernel, so it was excluded from the Linux’s traditional Bluetooth stack, Bluez. Beside the HCI layer, Bluedroid excluded any IPC mechanism, that means it is not running in an independent daemon process anymore, instead, it have to embed into your system.
+der Aufbau jeweils von unten nach oben
+Controller: 	Physical Layer (PHY) - Link Layer (LL) - Host-Controller-Interface (HCI) 
+Host:		Generic Access Profile/Generic Attribute Profile (GAP/GATT) - Security Manager/Attribute Protocoll (SM/ATT) - L2CAP   
+
+
+PHY:
+The physical layer (PHY) is a 1-Mbps adaptive frequency-hopping GFSK (Gaussian frequency-shift keying) radio operating in the unlicensed 2.4-GHz ISM (industrial, scientific, and medical) band.
+
+LL:
+the link layer of the Bluetooth low energy protocol stack handles the channel switching. The Bluetooth low energy stack supports fragmentation and recombination of L2CAP PDUs at the link layer. When fragmentation is used, larger packets are split into multiple link layer packets and reassembled by the link layer of the peer device.
+
+HCI:
+The HCI layer provides communication between the host and controller through a standardized interface. This layer can be implemented either through a software API or by a hardware interface such as UART, SPI, or USB. The Specification of the Bluetooth System describes Standard HCI commands and events. 
+The host controller interface (HCI) layer is a thin layer which transports commands and events between the host and controller elements of the Bluetooth protocol stack. In a pure network processor application the HCI layer is implemented through a transport protocol such as SPI or UART. In embedded wireless MCU projects the HCI layer is implemented through function calls and callbacks within the wireless MCU. All of the commands and events discussed, such as ATT, GAP, and so forth, pass from the upper layers of the protocol stack through the HCI layer to the controller. Likewise, the controller sends received data and events to the host and upper layers through HCI. As well as standard Bluetooth LE HCI commands, a number of HCI extension vendor-specific commands are available which extend some of the functionality of the controller for use by the application.
+
+GAP:
+-definiert Regeln um sicherzustellen, dass bt-stack korrekt läuft -
+The Generic Access Profile (GAP) controls the RF state of the device, with the device in one of five states: Standby, Advertising, Scanning, Initiating, Connected.
+Advertisers transmit data without connecting, while scanners scan for advertisers. An initiator is a device that responds to an advertiser with a request to connect. If the advertiser accepts the connection request, both the advertiser and initiator enter a connected state. When a device is connected, it connects as either master or slave. The device initiating the connection becomes the master and the device accepting the request becomes the slave.
+The Generic Access Profile (GAP) layer directly interfaces with the application and/or profiles, to handle device discovery and connection-related services for the device. GAP handles the initiation of security features.
+Es gibt vier mögliche Rollen für GAP: 
+	- broadcaster (sendet zB durchgehend Temperaturdaten )
+	- observer (scannt eingehende/empfangene daten)
+	- central (kann sich verbinden mit Peripherals )
+	- peripheral (sendet advertise-nachrihcten und hält Verbindung zu central)
+	
+SM:
+The Security Manager layer defines the methods for pairing and key distribution, and provides functions for the other layers of the protocol stack to securely connect and exchange data with another device.
+
+GATT:
+- teil von GAP um Protokoll und Datentransport auszuwählen -
+The Generic Attribute Profile (GATT) layer is a service framework that defines the sub-procedures for using ATT. Data communications that occur between two devices in a Bluetooth low energy connection are handled through GATT sub-procedures. The application and/or profiles will directly use GATT.
+GATT kommt ins Spiel nachdem GAP abgearbeitet wurde. GATT nutz ATT zum Datentransport
+Rollen innerhalb von GATT:
+Periperheral=GATT Server, enthält lookup-table mit profile, characteristics, services
+	--> 	profile: pre-defined collection of services
+		service: collection of chunks of data/characteristics, jeder Service hat eine UUID (verwaltet von der BSIG)
+		characteristic: encapsulates singeld data-point/value
+Merke: Profile enthält Services und Services enthalten characteristics, stellt sicher dass alles in standrad-ort gespiehcert/gegliedert ist
+
+	Characteristics haben Befehle: 	- command (sende ohne response)
+					- request (sende mit response)
+					- response (sende Antwort)
+					- notification (von Server zu Cient, falls sich ein ausgewählter Datenwert ändert)
+					- indication (von client zu server, wie notification)
+					- confirmation (von client zu server, acknowledgemnts für indications)
+ATT:
+- protocol zugehörig zu GATT, arbeitet auf L2CAP Ebene - 
+The ATT layer allows a device to expose certain pieces of data or attributes, to another device. 
+
+L2CAP:
+The L2CAP layer provides data encapsulation services to the upper layers, allowing for logical end-to-end communication of data.
+
+
+notwendige schritte zum datenaustausch zwischen central und peripheral:
+1.) central/client scannt auf peripherals, die gerade advertisen
+2.) central erstellt Verbindung mit ausgewähltem peripheral
+3.) central discovert Services auf diesem Peripheral
+4.) central discovert die gewünschten characteristics dieses Services auf dem peripheral
+5.) central sendet/empfängt data von characteristic of interest innerhalb services auf dem peripheral
+6.) central disconnects nach datentransfer
+
+>
+
+
+bezogen auf die vorhandenen beispiele:
+bt_l2cap_client:
+
+Both projects BT_L2CAP_Server(bt_l2cap_server) and BT_L2CAP_Client have the same initialization process but are independent of each other.
+
+the L2CAP initialization can be divided into the following steps:
+
+1.) initialisere Konfiguration von BT-Controller
+esp_bt_controller_config_t bt_cfg = BT_CONTROLLER_INIT_CONFIG_DEFAULT();
+esp_bt_controller_init(&bt_cfg)
+
+2.) enable den BT classic mode
+aus: esp-idf/components/bt/include/esp32c3/include/esp_bt.h: ESP_BT_MODE_CLASSIC_BT = 0x02,   /*!< Run Classic BT mode */
+esp_bt_controller_enable(ESP_BT_MODE_CLASSIC_BT)
+
+3.) initialisiere Konfiguration von bluedroid-stack
+esp_bluedroid_config_t bluedroid_cfg = BT_BLUEDROID_INIT_CONFIG_DEFAULT();
+esp_bluedroid_init_with_cfg(&bluedroid_cfg)
+
+4.) enable bluedroid
+esp_bluedroid_enable()
+
+5.) rufe callback-funktion für GAP auf
+static void esp_bt_gap_cb(esp_bt_gap_cb_event_t event, esp_bt_gap_cb_param_t *param)
+esp_bt_gap_register_callback(esp_bt_gap_cb)
+
+
+Connection process:
+Unterschiede zwischen client und server. 
+Setup des l2cap-client:
+
+esp_bt_gap_register_callback(esp_bt_gap_cb)	--> register GAP callbacks
+
+esp_bt_l2cap_register_callback(esp_bt_l2cap_cb)	--> register L2CAP callbacks
+
+esp_bt_l2cap_init()	--> initialisiere L2CAP
+
+
+Setting of SDP and process of service discovery. Similar to the L2CAP setup, there are separate paths for Server and Client:
+Setup des CLient:
+esp_sdp_register_callback(esp_sdp_cb)) 	--> register SDP callback
+
+esp_sdp_init()	--> initiate the SDP und einhergehend set device name and set the scan mode.
+
+esp_sdp_cb ist eine Funktion, in der ein switch-case erstellt wurde:
+    case ESP_SDP_INIT_EVT:
+    case ESP_SDP_DEINIT_EVT:
+    case ESP_SDP_SEARCH_COMP_EVT:
+    case ESP_SDP_CREATE_RECORD_COMP_EVT:
+    case ESP_SDP_REMOVE_RECORD_COMP_EVT:
+    
+    ...und ESP_SDP_INIT_EVT danach ESP_SDP_CREATE_RECORD_COMP_EVT werden abgearbeitet
+
+	der Aufruf von SDP_INIT führt zu folgendem:
+		case ESP_SDP_INIT_EVT:
+        ESP_LOGI(SDP_TAG, "ESP_SDP_INIT_EVT: status:%d", sdp_param->init.status);
+        if (sdp_param->init.status == ESP_SDP_SUCCESS) {
+            record.hdr.type = ESP_SDP_TYPE_RAW;
+            record.hdr.uuid.len = sizeof(UUID_UNKNOWN);
+            memcpy(record.hdr.uuid.uuid.uuid128, UUID_UNKNOWN, sizeof(UUID_UNKNOWN));
+            record.hdr.service_name_length = strlen(sdp_service_name) + 1;
+            record.hdr.service_name = sdp_service_name;
+            record.hdr.rfcomm_channel_number = BT_UNUSED_RFCOMM;
+            record.hdr.l2cap_psm = BT_L2CAP_DYNMIC_PSM;
+            record.hdr.profile_version = BT_UNKONWN_PROFILE_VERSION;
+            esp_sdp_create_record(&record);
+
+	der Aufruf von sdp-create führt wiederum zu Folgendem:
+		case ESP_SDP_CREATE_RECORD_COMP_EVT:
+        ESP_LOGI(SDP_TAG, "ESP_SDP_CREATE_RECORD_COMP_EVT: status:%d", sdp_param->create_record.status);
+        if (sdp_param->create_record.status == ESP_SDP_SUCCESS) {
+            esp_bt_gap_set_device_name(EXAMPLE_DEVICE_NAME);
+            esp_bt_gap_set_scan_mode(ESP_BT_CONNECTABLE, ESP_BT_GENERAL_DISCOVERABLE);
+            esp_bt_gap_start_discovery(ESP_BT_INQ_MODE_GENERAL_INQUIRY, 10, 0);
+        }
+
+	
+	case ESP_SDP_SEARCH_COMP_EVT:
+        ESP_LOGI(SDP_TAG, "ESP_SDP_SEARCH_COMP_EVT: status:%d", sdp_param->search.status);
+        if (sdp_param->search.status == ESP_SDP_SUCCESS) {
+            ESP_LOGI(SDP_TAG, "Remote device address: %s", bda2str(sdp_param->search.remote_addr, bda_str, sizeof(bda_str)));
+            ESP_LOGI(SDP_TAG, "Remote device record count: %d", sdp_param->search.record_count);
+            ESP_LOGI(SDP_TAG, "Remote device rfcomm channel number: %"PRId32, sdp_param->search.records->hdr.rfcomm_channel_number);
+            ESP_LOGI(SDP_TAG, "Remote device l2cap psm: 0x%04"PRIx32, sdp_param->search.records->hdr.l2cap_psm);
+            esp_bt_l2cap_connect(sec_mask, sdp_param->search.records->hdr.l2cap_psm, sdp_param->search.remote_addr);
+        }
+        
+        Am Ende wird per esp_bt_l2cap_connect(sec_mask, sdp_param->search.records->hdr.l2cap_psm, sdp_param->search.remote_addr);  eine Verbindung
+        aufgebaut.
+        
+        falls erfolgreich:
+        case ESP_BT_L2CAP_OPEN_EVT:
+        if (l2cap_param->open.status == ESP_BT_L2CAP_SUCCESS) {
+            ESP_LOGI(L2CAP_TAG, "ESP_BT_L2CAP_OPEN_EVT: status:%d, fd = %d, tx mtu = %"PRId32", remote_address:%s", l2cap_param->open.status,
+                    l2cap_param->open.fd, l2cap_param->open.tx_mtu, bda2str(l2cap_param->open.rem_bda, bda_str, sizeof(bda_str)));
+            l2cap_wr_task_start_up(l2cap_write_handle, l2cap_param->open.fd);
+            
+            --> mit  l2cap_wr_task_start_up(l2cap_write_handle, l2cap_param->open.fd); werden dann Daten ausgetauscht
+            
+            
+ der build mit bt_l2cap klappt nicht. am besten projekt neu kopieren und falls build fehlschlägt shclau machen wegen linker oder assembler  
+ 	--> für neuen Build: 1.) idf.py set-target esp32c3
+ 				2.) idf.py build
+ 				
+ 				
+ 		FEHLER:  I'm not a Bluetooth expert, but my guess would be that Bluetooth Serial is a BT Classic protocol. The ESP32C3 only supports BTLE. 
+ 				--> nur examples aus ble sollten klappen
+ ______________________________________________________________________________________________________________________				
+ 				
+ neuer Test: gatt_client:	idf.py set-target esp32c3  +  idf.py build + idf.py flash + idf.py monitor  funktioniert !
+ 
+ 	next:tutorial durchlesen um zu verstehen, was passiert.
+ 	
+ 	kurz:
+ 	The code implements a Bluetooth Low Energy (BLE) Generic Attribute (GATT) client, which scans for nearby peripheral servers and connects to a predefined service. The client then searches for available characteristics and subscribes to a known characteristic in order to receive notifications or indications.
+ 	
+ 	
+    bt.h: configures the BT controller and VHCI from the host side.
+    esp_bt_main.h: initializes and enables the Bluedroid stack.
+    esp_gap_ble_api.h: implements the GAP configuration, such as advertising and connection parameters.
+    esp_gattc_api.h: implements the GATT Client configuration, such as connecting to peripherals and searching for services.
+
+
+----------------------	Init - Prozess ---------------------------------------------
+
+The main function starts by initializing the non-volatile storage library. This library allows to save key-value pairs in flash memory and is used by some components such as the Wi-Fi library to save the SSID and password:
+
+	esp_err_t ret = nvs_flash_init();
+
+	esp_bt_controller_config_t bt_cfg = BT_CONTROLLER_INIT_CONFIG_DEFAULT();
+    	ret = esp_bt_controller_init(&bt_cfg);
+    
+   The main function also initializes the BT controller by first creating a BT controller configuration structure named esp_bt_controller_config_t with default settings generated by the BT_CONTROLLER_INIT_CONFIG_DEFAULT() macro. The BT controller implements the Host Controller Interface (HCI) on the controller side, the Link Layer (LL) and the Physical Layer (PHY). The BT Controller is invisible to the user applications and deals with the lower layers of the BLE stack.
+ 
+ Next, the controller is enabled in BLE Mode.
+	ret = esp_bt_controller_enable(ESP_BT_MODE_BLE);
+	
+Next, the Bluedroid stack, which includes the common definitions and APIs for both BT Classic and BLE, is initialized and enabled by using:
+
+	ret = esp_bluedroid_init();
+	ret = esp_bluedroid_enable();
+	
+The main function ends by registering the GAP and GATT event handlers, as well as the Application Profile and set the maximum supported MTU size.
+
+    //register the  callback function to the gap module
+    ret = esp_ble_gap_register_callback(esp_gap_cb);
+
+    //register the callback function to the gattc module
+    ret = esp_ble_gattc_register_callback(esp_gattc_cb);
+
+    ret = esp_ble_gattc_app_register(PROFILE_A_APP_ID);
+
+    esp_err_t local_mtu_ret = esp_ble_gatt_set_local_mtu(500);
+    
+The GAP and GATT event handlers are the functions used to catch the events generated by the BLE stack and execute functions to configure parameters of the application. Moreover, the event handlers are also used to handle read and write events coming from the central. The GAP event handler takes care of scanning and connecting to servers and the GATT handler manages events that happen after the client has connected to a server, such as searching for services and writing and reading data. The GAP and GATT event handlers are registered by using:
+
+	esp_ble_gap_register_callback();
+	esp_ble_gattc_register_callback();
+
+The functions esp_gap_cb() and esp_gattc_cb() handle all the events generated by the BLE stack.
+
+	 
+Application Profiles are a way to group functionalities that are designed for one or more server applications. For example, you can have one Application Profile connected to the Heart Rate Sensors, and another one connected to the Temperature Sensors. Each Application Profile creates a GATT interface to connect to other devices. The Application Profiles in the code are instances of the gattc_profile_inst structure, which is defined as:	 
+    
+struct gattc_profile_inst {
+    esp_gattc_cb_t gattc_cb;		//GATT client callback function
+    uint16_t gattc_if;			//GATT client interface number for this profile
+    uint16_t app_id;			//Application Profile ID number
+    uint16_t conn_id;			// connection ID
+    uint16_t service_start_handle;	// Service start handle
+    uint16_t service_end_handle;	// service end handle
+    uint16_t char_handle;		// characteristic handle
+    esp_bd_addr_t remote_bda;		Remote device address connected to this client
+};
+
+In this example there is one Application Profile and its ID is defined as:
+
+#define PROFILE_NUM 1
+#define PROFILE_A_APP_ID 0
+
+The Application Profile are stored in the gl_profile_tab array, which is initialized as:
+
+/* One gatt-based profile one app_id and one gattc_if, this array will store the gattc_if returned by ESP_GATTS_REG_EVT */
+static struct gattc_profile_inst gl_profile_tab[PROFILE_NUM] = {
+		[PROFILE_A_APP_ID] = {
+		.gattc_cb = gattc_profile_event_handler, /* the eventhandler is defining the callback function for Profile */
+		.gattc_if = ESP_GATT_IF_NONE, /* Not get the gatt_if, so initial is ESP_GATT_IF_NONE */
+    },
+};
+
+The profile registration triggers an ESP_GATTC_REG_EVT (ESP-GATTclient-register-event), which is handled by the esp_gattc_cb() event handler.
+The handler takes the GATT interface returned by the event and stores it in the profile table:
+
+static void esp_gattc_cb(esp_gattc_cb_event_t event, esp_gatt_if_t gattc_if, esp_ble_gattc_cb_param_t *param)
+{
+    ESP_LOGI(GATTC_TAG, "EVT %d, gattc if %d", event, gattc_if);
+
+    /* If event is register event, store the gattc_if for each profile */
+    if (event == ESP_GATTC_REG_EVT) {
+        if (param->reg.status == ESP_GATT_OK) {
+            gl_profile_tab[param->reg.app_id].gattc_if = gattc_if;
+        } else {
+            ESP_LOGI(GATTC_TAG, "reg app failed, app_id %04x, status %d",
+                    param->reg.app_id,
+                    param->reg.status);
+            return;
+        }
+    }
+    
+Finally, the callback function invokes the corresponding event handler for each profile in the gl_profile_tab table.
+next call: btc_transfer_context	//transfer an message to another module in the different task
+
+at last: esp_ble_gatt_set_local_mtu	//This function is called to set local MTU, the function is called before BLE connection.
+
+
+Programm-Ablauf:
+I (387) BLE_INIT: BT controller compile version [ba3b3e3]
+I (397) BLE_INIT: Bluetooth MAC: 84:fc:e6:01:1a:06
+I (397) phy_init: phy_version 1180,01f2a49,Jun  4 2024,16:34:25
+ --- Entering function: esp_ble_gap_register_callback ---  --- this is function btc_profile_cb_set ---
+ --- this is function esp_ble_gattc_register_callback ---
+ --- this is function btc_profile_cb_set ---
+ --- this is function esp_ble_gattc_app_register --
+I (467) GATTC_DEMO: REG_EVT
+I (477) GATTC_DEMO: scan start success
+I (477) main_task: Returned from app_main()
+I (497) GATTC_DEMO: 8c 79 f5 12 95 53 
+I (497) GATTC_DEMO: searched Adv Data Len 28, Scan Response Len 0
+
+
+----------------------	Scan - Prozess ---------------------------------------------
+
+The GATT client normally scans for nearby servers and tries connect to them, if interested. However, in order to perform the scanning, first the configuration parameters need to be set. This is done after the registration of the Application Profiles, because the registration, once completed, triggers an ESP_GATTC_REG_EVT event. The first time this event is triggered, the GATT event handler captures it and assigns a GATT interface to Profile A, then the event is forwarded to the GATT event handler of Profile A. Once in this event handler, the event is used to call the esp_ble_gap_set_scan_params() function, which takes a ble_scan_params structure instance as parameter. This structure is defined as:
+/// Ble scan parameters
+typedef struct {
+    esp_ble_scan_type_t     scan_type;              /*!< Scan type */
+    esp_ble_addr_type_t     own_addr_type;          /*!< Owner address type */
+    esp_ble_scan_filter_t   scan_filter_policy;     /*!< Scan filter policy */
+    uint16_t                scan_interval;          /*!< Scan interval. This is defined as the time interval from when the Controller started its last LE scan until it begins the subsequent LE scan.*/
+    //Range: 0x0004 to 0x4000
+    //Default: 0x0010 (10 ms)
+    //Time = N * 0.625 msec
+    //Time Range: 2.5 msec to 10.24	seconds
+    uint16_t                scan_window;            /*!< Scan window. The duration of the LE scan. LE_Scan_Window shall be less than or equal to LE_Scan_Interval*/
+    //Range: 0x0004 to 0x4000                                                   	 //Default: 0x0010 (10 ms)
+    //Time = N * 0.625 msec
+    //Time Range: 2.5 msec to 10240 msec
+} esp_ble_scan_params_t;
+
+And ble_scan_paramateres is initialized as:
+
+static esp_ble_scan_params_t ble_scan_params = {
+    .scan_type              = BLE_SCAN_TYPE_ACTIVE,		//scanning is active (includes reading the scanning response)
+    .own_addr_type          = BLE_ADDR_TYPE_PUBLIC,	
+    .scan_filter_policy     = BLE_SCAN_FILTER_ALLOW_ALL,	//allows any advertising device to be read
+    .scan_interval          = 0x50,				//scanning interval of 100 ms (1.25 ms * 0x50)
+    .scan_window            = 0x30,				//scanning window of 60 ms (1.25 ms * 0x30)
+    .scan_duplicate         = BLE_SCAN_DUPLICATE_DISABLE
+};
+
+die Funktion gattc_profile_event_handler  geht alle cases durch, wie eine state-machine.
+Bei ESP_GATTC_REG_EVT  wird esp_ble_gap_set_scan_params(&ble_scan_params) aufgerufen. 
+
+Once the scanning parameters are set, an ESP_GAP_BLE_SCAN_PARAM_SET_COMPLETE_EVT event is triggered, which is handled by the GAP event handler esp_gap_cb(). This event is used to start the scanning of nearby GATT servers.
+
+danach wird irgendwann esp_gap_cb aufgerufen, dass die scan-events wie zB ESP_GAP_BLE_SCAN_START_COMPLETE_EVT  behandelt.
+Die Signale lassen sich in esp_gap_ble_api.h nachlesen, hier zB:
+ ESP_GAP_BLE_SCAN_START_COMPLETE_EVT,                    /*!< When start scan complete, the event comes */
+
+The scanning is started using the esp_ble_gap_start_scanning() function which takes a parameter representing the duration of the continuous scanning (in seconds). Once the scanning period is ended, an ESP_GAP_SEARCH_INQ_CMPL_EVT event is triggered.
+
+
+The results of the scanning are displayed as soon as they arrive with the ESP_GAP_BLE_SCAN_RESULT_EVT event, which includes the following parameters:
+    /**
+     * @brief ESP_GAP_BLE_SCAN_RESULT_EVT
+     */
+    struct ble_scan_result_evt_param {
+        esp_gap_search_evt_t search_evt;            /*!< Search event type */
+        esp_bd_addr_t bda;                          /*!< Bluetooth device address which has been searched */
+        esp_bt_dev_type_t dev_type;                 /*!< Device type */
+        esp_ble_addr_type_t ble_addr_type;          /*!< Ble device address type */
+        esp_ble_evt_type_t ble_evt_type;            /*!< Ble scan result event type */
+        int rssi;                                   /*!< Searched device's RSSI */
+        uint8_t  ble_adv[ESP_BLE_ADV_DATA_LEN_MAX + ESP_BLE_SCAN_RSP_DATA_LEN_MAX]; /*!< Received EIR */
+        int flag;                                   /*!< Advertising data flag bit */
+        int num_resps;                              /*!< Scan result number */
+        uint8_t adv_data_len;                       /*!< Adv data length */
+        uint8_t scan_rsp_len;                       /*!< Scan response length */
+    } scan_rst;                                     /*!< Event parameter of ESP_GAP_BLE_SCAN_RESULT_EVT */
+    
+This event also includes a list of sub events as shown below:
+/// Sub Event of ESP_GAP_BLE_SCAN_RESULT_EVT
+typedef enum {
+    ESP_GAP_SEARCH_INQ_RES_EVT             = 0,      /*!< Inquiry result for a peer device. */
+    ESP_GAP_SEARCH_INQ_CMPL_EVT            = 1,      /*!< Inquiry complete. */
+    ESP_GAP_SEARCH_DISC_RES_EVT            = 2,      /*!< Discovery result for a peer device. */
+    ESP_GAP_SEARCH_DISC_BLE_RES_EVT        = 3,      /*!< Discovery result for BLE GATT based service on a peer device. */
+    ESP_GAP_SEARCH_DISC_CMPL_EVT           = 4,      /*!< Discovery complete. */
+    ESP_GAP_SEARCH_DI_DISC_CMPL_EVT        = 5,      /*!< Discovery complete. */
+    ESP_GAP_SEARCH_SEARCH_CANCEL_CMPL_EVT  = 6,      /*!< Search cancelled */
+} esp_gap_search_evt_t;
+
+We are interested in the ESP_GAP_SEARCH_INQ_RES_EVT event, which is called every time a new device is found. We are also interested in the ESP_GAP_SEARCH_INQ_CMPL_EVT, which is triggered when the duration of the scanning is completed and can be used to restart the scanning procedure:
+
+Die nachricht "main_task: Returned from app_main()" stammt vom freertos, nachzulesen in app_startup.c
+
+    ESP_LOGI(MAIN_TAG, "Calling app_main()");
+    extern void app_main(void);
+    app_main();
+    ESP_LOGI(MAIN_TAG, "Returned from app_main()");
+
+
+das bedeutet app_main ist sozusagen einmal durchgelaufen, während im HIntergrund nun esp_gap_cb weiterläuft 
+und case ESP_GAP_BLE_SCAN_RESULT_EVT abarbeitet.
+falls case ESP_GAP_SEARCH_INQ_RES_EVT:
+	
+		I (497) GATTC_DEMO: 8c 79 f5 12 95 53 	--> esp_log_buffer_hex(GATTC_TAG, scan_result->scan_rst.bda, 6);
+I (497) GATTC_DEMO: searched Adv Data Len 28, Scan Response Len 0   --> ESP_LOGI(GATTC_TAG, "searched Adv Data Len %d, Scan Response Len %d", scan_result->scan_rst.adv_data_len, scan_result->scan_rst.scan_rsp_len);
+I (507) GATTC_DEMO: searched Device Name Len 0  --> ESP_LOGI(GATTC_TAG, "searched Device Name Len %d", adv_name_len);
+
+First the device name is resolved and compared to the one defined in remote_device_name. If it equals to the device name of the GATT Server we are interested in, then the scanning is stopped.
+	-->  static const char remote_device_name[] = "ESP_GATTS_DEMO";
+		
+
+
+
+
+
