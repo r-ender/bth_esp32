@@ -915,7 +915,157 @@ I (507) GATTC_DEMO: searched Device Name Len 0  --> ESP_LOGI(GATTC_TAG, "searche
 First the device name is resolved and compared to the one defined in remote_device_name. If it equals to the device name of the GATT Server we are interested in, then the scanning is stopped.
 	-->  static const char remote_device_name[] = "ESP_GATTS_DEMO";
 		
+< später bluetooth-reichweite:
+ESP_PWR_LVL_N12 (power level -12 dBm)
+ESP_PWR_LVL_N9 (power level -9 dBm)
+ESP_PWR_LVL_N6 (power level -6 dBm)
+ESP_PWR_LVL_N3 (power level -3 dBm)
+ESP_PWR_LVL_0 (0 dBm power level)
 
+For example, to set the power level to -6 dBm, you could use the following code:
+
+
+#include "BLEDevice.h"
+
+void setup()
+{
+BLEDevice::init("My BLE device");
+esp_ble_tx_power_set(ESP_PWR_LVL_N6);
+}
+
+void loop()
+{
+// your code here
+}
+
+Note that the esp_ble_tx_power_set function is only available in version 5.2.0 or later of the BLE library.
+>
+
+( Fehler beim installieren mit python3-venv  lösen durch "sudo apt-get install python3.8.venv", also nicht bloß python3-venv oder so.
+
+und für
+CMake Error at CMakeLists.txt:3 (cmake_minimum_required):
+  CMake 3.16 or higher is required.  You are running version 3.10.2
+-->
+apt remove cmake -y
+pip install cmake --upgrade
+
+([Errno 13] could not open port /dev/ttyUSB0: [Errno 13] Permission denied: '/dev/ttyUSB0'	--> sudo chmod 666 /dev/ttyUSB0s
+
+LoRa evtl potenzial (lora zu ble-wandler ?!)
+
+versuch gattserver zu bauen erfolgreichen, jetzt auswerten!
+
+< ein Application profile bündelt services, die wiederum characeristics haben. der gatt-server kann mehrere Application Profiles speichern/bedienen.
+Each profile is in programming defined as a struct where the struct members depend on the services and characteristics that are implemented in that Application Profile.
+Jedes App.-Profile besteht aus:
+    GATT interface
+    Application ID
+    Connection ID
+    Service handle
+    Service ID
+    Characteristic handle
+    Characteristic UUID
+    Attribute permissions
+    Characteristic properties
+    Client Characteristic Configuration descriptor handle
+    Client Characteristic Configuration descriptor UUID
+
+übersetzt in programm-code erhält man folgende struct:
+struct gatts_profile_inst {
+    esp_gatts_cb_t gatts_cb;
+    uint16_t gatts_if;
+    uint16_t app_id;
+    uint16_t conn_id;
+    uint16_t service_handle;
+    esp_gatt_srvc_id_t service_id;
+    uint16_t char_handle;
+    esp_bt_uuid_t char_uuid;
+    esp_gatt_perm_t perm;
+    esp_gatt_char_prop_t property;
+    uint16_t descr_handle;
+    esp_bt_uuid_t descr_uuid;
+};
+
+Falls es mehrere App.Profiles gibt, werden sie in einem array gespeichert and the corresponding callback functions gatts_profile_a_event_handler() and gatts_profile_b_event_handler() are assigned.
+
+Different applications on the GATT client use different interfaces, represented by the gatts_if parameter. For initialization, this parameter is set to ESP_GATT_IF_NONE, which means that the Application Profile is not linked to any client yet.
+
+/* One gatt-based profile one app_id and one gatts_if, this array will store the gatts_if returned by ESP_GATTS_REG_EVT */
+static struct gatts_profile_inst gl_profile_tab[PROFILE_NUM] = {
+    [PROFILE_A_APP_ID] = {
+        .gatts_cb = gatts_profile_a_event_handler,
+        .gatts_if = ESP_GATT_IF_NONE,       /* Not get the gatt_if, so initial is ESP_GATT_IF_NONE */
+    },
+    [PROFILE_B_APP_ID] = {
+        .gatts_cb = gatts_profile_b_event_handler,                   /* This demo does not implement, similar as profile A */
+        .gatts_if = ESP_GATT_IF_NONE,       /* Not get the gatt_if, so initial is ESP_GATT_IF_NONE */
+    },
+};
+
+Finally, the Application Profiles are registered using the Application ID, which is an user-assigned number to identify each profile. In this way, multiple Application Profiles can run in one server.
+
+
+Advertisement = announcement (Bekanntgabe) - allows BLE device to introduce itself.
+Adv. dienen einmal zum Broadcasten/Senden von daten ohne feste Verbindung, zB ein Beacon sendet Ortsdaten oder Wetterdaten ohne connection-overhead ( = jeder kann die daten abgreifen), und zweitens für connect und exchange daten mit anderen Geräten.
+
+Bsp: ein Peripheral sendet Avertisements, damit es von einem Central entdeckt wrid, und diese eine gemeinsam längerfristige Verbindung aufbauen, 
+oder das peripheral sendet sporadisch Beacons. 
+Bei BLE gibt es 40 cahnnels, 3 davon werden exklusiv für advertisements genutzt und die anderen 37 dann, wenn verbindung aufgebaut wurde.
+
+Es gibt zwei Arten von scanning, active und passive:
+passive: scanner listen for advertisements of advertiser aber gibt keine response
+active: scanner listens to advertisers and issues a scan request, worauf der advertiser mit scan response packet antwortet
+
+3 arten von advertisements: connectable, scannable, directed
+
+aufbau advertising paket:
+für Link Layer: LSB: Preamble (1B) - Access Address (4B) - Protocol data unit/PDU (2-39B) - CRC check(3B) :MSB	// das LSB=Preamble wird logischerweise zuerst gesendet 
+für PDU:  wird aufgeteilt in Header(2B) und Payload (max 37B)
+PDU-Header: PDU-Type (4b): Advertising,Scanning oder initiating - RFU (1b) - ChannelSel./Freq.hopping (1b) - TxAdd (1b) - RxAdd (1b) - PayloadLen ( 8b) - 
+PDU-Payload: Advertiser-addr. (6B) - Advertiser-Payload (max 31B)
+>
+
+
+ this example uses the Profile A GATT event handle to configure the advertising parameters upon registration.
+The raw advertising data can be used to implement iBeacons, Eddystone or other proprietaries, and custom frame types such as the ones used for Indoor Location Services that are different from the standard specifications.
+The function used to configure standard Bluetooth Specification advertisement parameters is esp_ble_gap_config_adv_data(), which takes a pointer to an esp_ble_adv_data_t structure
+
+typedef struct {
+    bool set_scan_rsp;            /*!< Set this advertising data as scan response or not*/
+    bool include_name;            /*!< Advertising data include device name or not */
+    bool include_txpower;         /*!< Advertising data include TX power */
+    int min_interval;             /*!< Advertising data show slave preferred connection min interval */
+    int max_interval;             /*!< Advertising data show slave preferred connection max interval */
+    int appearance;               /*!< External appearance of device */
+    uint16_t manufacturer_len;    /*!< Manufacturer data length */
+    uint8_t *p_manufacturer_data; /*!< Manufacturer data point */
+    uint16_t service_data_len;    /*!< Service data length */
+    uint8_t *p_service_data;      /*!< Service data point */
+    uint16_t service_uuid_len;    /*!< Service uuid length */
+    uint8_t *p_service_uuid;      /*!< Service uuid array point */
+    uint8_t flag;                 /*!< Advertising flag of discovery mode, see BLE_ADV_DATA_FLAG detail */
+} esp_ble_adv_data_t;
+
+
+here for this example:
+static esp_ble_adv_data_t adv_data = {
+    .set_scan_rsp = false,
+    .include_name = true,
+    .include_txpower = true,
+    .min_interval = 0x0006,
+    .max_interval = 0x0010,
+    .appearance = 0x00,
+    .manufacturer_len = 0, //TEST_MANUFACTURER_DATA_LEN,
+    .p_manufacturer_data =  NULL, //&test_manufacturer[0],
+    .service_data_len = 0,
+    .p_service_data = NULL,
+    .service_uuid_len = 32,
+    .p_service_uuid = test_service_uuid128,
+    .flag = (ESP_BLE_ADV_FLAG_GEN_DISC | ESP_BLE_ADV_FLAG_BREDR_NOT_SPT),
+};
+
+- to set the device name, the esp_ble_gap_set_device_name()
 
 
 
