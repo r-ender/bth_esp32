@@ -915,6 +915,88 @@ I (507) GATTC_DEMO: searched Device Name Len 0  --> ESP_LOGI(GATTC_TAG, "searche
 First the device name is resolved and compared to the one defined in remote_device_name. If it equals to the device name of the GATT Server we are interested in, then the scanning is stopped.
 	-->  static const char remote_device_name[] = "ESP_GATTS_DEMO";
 		
+		
+		
+----------------------	Connecting to GATT server - Prozess ---------------------------------------------
+
+Every time we receive a result from the ESP_GAP_SEARCH_INQ_RES_EVT event, the code first prints the address of the remote device:
+
+case ESP_GAP_SEARCH_INQ_RES_EVT:
+     ESP_LOG_BUFFER_HEX(GATTC_TAG, scan_result->scan_rst.bda, 6);
+
+The client then prints the advertised data length and the scan response length:
+
+ESP_LOGI(GATTC_TAG, "searched Adv Data Len %d, Scan Response Len %d", scan_result->scan_rst.adv_data_len, scan_result->scan_rst.scan_rsp_len);
+
+In order to get the device name, we use the esp_ble_resolve_adv_data() function, which takes the advertised data stored in scan_result->scan_rst.ble_adv, the type of advertising data and the length, in order to extract the value from the advertising packet frame. 
+
+ESP_LOG_BUFFER_CHAR(GATTC_TAG, adv_name, adv_name_len);
+
+Finally if the remote device name is the same as we have defined above, the local device stops scanning and tries to open a connection to the remote device using the esp_ble_gattc_open() function. This function takes as parameters the Application Profile GATT interface, the remote server address and a boolean value. The boolean value is used to indicate if the connection is done directly or if it’s done in the background (auto-connection), at the moment this boolean value must be set to true in order to establish the connection.
+
+idf.py -p /dev/ttyUSB0 flash monitor
+
+
+linux-pc:
+rolando@RolandoTestPC:~$ bluetoothctl
+Agent registered
+[CHG] Controller E4:A4:71:F1:24:C5 Pairable: yes
+[bluetooth]# show
+Controller E4:A4:71:F1:24:C5 (public)
+	Name: RolandoTestPC
+	Alias: RolandoTestPC
+	Class: 0x007c010c
+	Powered: yes
+	Discoverable: no
+	DiscoverableTimeout: 0x000000b4
+	Pairable: yes
+	UUID: Message Notification Se.. (00001133-0000-1000-8000-00805f9b34fb)
+	UUID: A/V Remote Control        (0000110e-0000-1000-8000-00805f9b34fb)
+	UUID: OBEX Object Push          (00001105-0000-1000-8000-00805f9b34fb)
+	UUID: Message Access Server     (00001132-0000-1000-8000-00805f9b34fb)
+	UUID: PnP Information           (00001200-0000-1000-8000-00805f9b34fb)
+	UUID: IrMC Sync                 (00001104-0000-1000-8000-00805f9b34fb)
+	UUID: Vendor specific           (00005005-0000-1000-8000-0002ee000001)
+	UUID: Headset                   (00001108-0000-1000-8000-00805f9b34fb)
+	UUID: A/V Remote Control Target (0000110c-0000-1000-8000-00805f9b34fb)
+	UUID: Generic Attribute Profile (00001801-0000-1000-8000-00805f9b34fb)
+	UUID: Phonebook Access Server   (0000112f-0000-1000-8000-00805f9b34fb)
+	UUID: Device Information        (0000180a-0000-1000-8000-00805f9b34fb)
+	UUID: Audio Sink                (0000110b-0000-1000-8000-00805f9b34fb)
+	UUID: Generic Access Profile    (00001800-0000-1000-8000-00805f9b34fb)
+	UUID: Handsfree Audio Gateway   (0000111f-0000-1000-8000-00805f9b34fb)
+	UUID: Audio Source              (0000110a-0000-1000-8000-00805f9b34fb)
+	UUID: OBEX File Transfer        (00001106-0000-1000-8000-00805f9b34fb)
+	Modalias: usb:v1D6Bp0246d0540
+	Discovering: no
+	Roles: central
+	Roles: peripheral
+Advertising Features:
+	ActiveInstances: 0x00 (0)
+	SupportedInstances: 0x05 (5)
+	SupportedIncludes: tx-power
+	SupportedIncludes: appearance
+	SupportedIncludes: local-name
+
+	--> für discoverable on --> sudo bluetoothctl --> discoverable on
+
+esp 32:
+Serial port /dev/ttyUSB0
+Connecting....
+Chip is ESP32-C3 (QFN32) (revision v0.4)
+Features: WiFi, BLE, Embedded Flash 4MB (XMC)
+Crystal is 40MHz
+MAC: 84:fc:e6:01:1a:04
+
+I (388) BLE_INIT: BT controller compile version [ba3b3e3]
+I (398) BLE_INIT: Bluetooth MAC: 84:fc:e6:01:1a:06
+
+--> die bluetooths von linuxPC und ESP32 erkennen sich nciht gegenseitig, evtl mal band/frequenz checken ?!
+
+		--> als test auch mal gattserver builden und flashen, und schauen ob das von handy/pc erkannt wird
+		
+		
+		
 < später bluetooth-reichweite:
 ESP_PWR_LVL_N12 (power level -12 dBm)
 ESP_PWR_LVL_N9 (power level -9 dBm)
@@ -1065,8 +1147,275 @@ static esp_ble_adv_data_t adv_data = {
     .flag = (ESP_BLE_ADV_FLAG_GEN_DISC | ESP_BLE_ADV_FLAG_BREDR_NOT_SPT),
 };
 
-- to set the device name, the esp_ble_gap_set_device_name()
+- to set the device name: esp_ble_gap_set_device_name() --> namen ändern klappt!
+
+Connecten klappt per App aber nicht per normalem Handy-Bluetooth
+
+alle ESP-events GATTS werden von gatts_profile_a_event_handler verarbeitet:
+GATTS_DEMO: REGISTER_APP_EVT, status 0, app_id 0 
+	( When an Application Profile is registered, this event is triggered. Its parameters are operation status and application id, 
+		and the GATT interface assigned by the BLE stack.
+		The event is captured by the gatts_event_handler(), which used to store the generated interface in the profile table, and then the event is 		
+		forwarded to the corresponding profile event handler.
+	)
+	--> gl_profile_tab[PROFILE_A_APP_ID]  --> ist Array mit gespeicherten Profiles
+	--> esp_ble_gap_set_device_name  // setze device name
+	--> esp_ble_gap_config_adv_data(&adv_data)
+	--> esp_ble_gap_config_adv_data(&scan_rsp_data)
+	--> esp_ble_gatts_create_service(gatts_if, &gl_profile_tab[PROFILE_A_APP_ID].service_id, GATTS_NUM_HANDLE_TEST_A)
+		--> in esp_gatts_api.c
+		--> erzeuge service mit msg, arg und memcpy und btc_transfer_context
+			--> The number of handles is defined as 4: 
+				Service handle, Characteristic handle, Characteristic value handle, Characteristic descriptor handle
+
+
+BT_BTM: BTM_BleWriteAdvData, Partial data write into ADV
+	--> This function is called to write advertising data.
+	
+BT_BTM: BTM_BleWriteScanRsp, Partial data write into ADV
+	--> This function is called to write LE scan response.
+	
+	
+GATTS_DEMO: CREATE_SERVICE_EVT, status 0,  service_handle 40
+	( When a service is created successfully, this event managed by the profile GATT handler is triggered, 
+	and can be used to start the service and add characteristics to the service)
+	--> the service handle generated by the BLE stack is stored in the profile table, which will be used later by the application layer to refer to this 
+		service. Then, the UUID of the characteristic and its UUID length are set. The length of the characteristic UUID is again 16 bits.
+	--> esp_ble_gatts_start_service(gl_profile_tab[PROFILE_A_APP_ID].service_handle); 	//start service
+		--> btc_transfer_context(&msg, &arg, sizeof(btc_ble_gatts_args_t), NULL, NULL)
+	--> esp_ble_gatts_add_char	//adding characteristics (= permissions and properties)
+		--> esp_ble_gatts_add_char_desc_param_check(char_val, control); //parameter validation check
+		--> msg + arg btc_transfer_context
+
+GATTS_DEMO: SERVICE_START_EVT, status 0, service_handle 40
+	--> taucht unter Event ESP_GATTS_START_EVT auf
+	--> keine Aktion außer Textausgabe
+	
+GATTS_DEMO: ADD_CHAR_EVT, status 0,  attr_handle 42, service_handle 40
+	( Adding a characteristic to a service triggers this event, which returns the handle generated by the stack for the characteristic just added.)
+	--> taucht unter ESP_GATTS_ADD_CHAR_EVT auf
+	--> esp_ble_gatts_add_char_descr
+		--> esp_ble_gatts_add_char_desc_param_check(char_val, control); //parameter validation check
+		--> msg + arg btc_transfer_context
+		
+GATTS_DEMO: the gatts demo char length = 3
+I (497) GATTS_DEMO: prf_char[0] =11
+I (507) GATTS_DEMO: prf_char[1] =22
+I (507) GATTS_DEMO: prf_char[2] =33
+
+GATTS_DEMO: ADD_DESCR_EVT, status 0, attr_handle 43, service_handle 40
+	( Once the descriptor is added, this event is triggered, which in this example is used to print an information message)
+	--> taucht unter ESP_GATTS_ADD_CHAR_DESCR_EVT auf
+	--> gl_profile_tab[PROFILE_A_APP_ID].descr_handle = param->add_char_descr.attr_handle;
+
+GATTS_DEMO: REGISTER_APP_EVT, status 0, app_id 1
+GATTS_DEMO: CREATE_SERVICE_EVT, status 0,  service_handle 44
+GATTS_DEMO: SERVICE_START_EVT, status 0, service_handle 44
+GATTS_DEMO: ADD_CHAR_EVT, status 0,  attr_handle 46, service_handle 44
+GATTS_DEMO: ADD_DESCR_EVT, status 0, attr_handle 47, service_handle 44
+	--> Funktionen siehe oben
+
+(557) main_task: Returned from app_main()
+	--> Wartezeit bis Gerät verbinden möchte
+	
+GATTS_DEMO: ESP_GATTS_CONNECT_EVT, conn_id 0, remote 7b:d8:84:1d:18:59:
+	( this event is triggered when a client has connected to the GATT server. It is used to update the connection parameters)
+	--> esp_ble_conn_update_params_t conn_params = {0};
+	--> memcpy(conn_params.bda, param->connect.remote_bda, sizeof(esp_bd_addr_t));
+	--> conn_params.latency = 0;
+            conn_params.max_int = 0x20;    // max_int = 0x20*1.25ms = 40ms
+            conn_params.min_int = 0x10;    // min_int = 0x10*1.25ms = 20ms
+            conn_params.timeout = 400;    // timeout = 400*10ms = 4000ms
+        --> gl_profile_tab[PROFILE_A_APP_ID].conn_id = param->connect.conn_id
+        --> esp_ble_gap_update_conn_params(&conn_params); //triggers a GAP event for printing + start sent the update connection parameters to the peer device
+        
+GATTS_DEMO: CONNECT_EVT, conn_id 0, remote 7b:d8:84:1d:18:59:
+	--> taucht unter ESP_GATTS_CONNECT_EVT auf unter "gatts_profile_b_event_handler"
+	
+GATTS_DEMO: packet length updated: rx = 27, tx = 251, status = 0	
+	--> taucht unter Event in ESP_GAP_BLE_SET_PKT_LENGTH_COMPLETE_EVT in gap_event_handler() auf
+
+GATTS_DEMO: update connection params status = 0, min_int = 16, max_int = 32,conn_int = 6,latency = 0, timeout = 500
+	--> taucht unter ESP_GAP_BLE_UPDATE_CONN_PARAMS_EVT in gap_event_handler() auf 
+
+GATTS_DEMO: ESP_GATTS_DISCONNECT_EVT, disconnect reason 0x13
+	--> param->disconnect.reason
+	--> esp_ble_gap_start_advertising(&adv_params);
+
+
+es fehlt ESP_GATTS_READ_EVT ?!	--> hat geklappt mit der App Ble-Tester  (die andere kan nich deinstallieren)
+I (296017) GATTS_DEMO: GATT_WRITE_EVT, conn_id 0, trans_id 3, handle 42
+I (296017) GATTS_DEMO: GATT_WRITE_EVT, value len 6, value :
+I (296017) GATTS_DEMO: 7a 74 67 68 37 38
 
 
 
 
+I (557) main_task: Returned from app_main()
+I (8687) GATTS_DEMO: ESP_GATTS_CONNECT_EVT, conn_id 0, remote 61:e5:3d:36:65:6d:
+I (8687) GATTS_DEMO: CONNECT_EVT, conn_id 0, remote 61:e5:3d:36:65:6d:
+I (8737) GATTS_DEMO: packet length updated: rx = 27, tx = 251, status = 0
+I (9197) GATTS_DEMO: update connection params status = 0, min_int = 16, max_int = 32,conn_int = 32,latency = 0, timeout = 400
+W (41717) BT_BTM: btm_sec_clr_temp_auth_service() - no dev CB
+
+E (41717) BT_BTM: Device not found
+
+W (41717) BT_HCI: hcif disc complete: hdl 0x1, rsn 0x13
+I (41717) GATTS_DEMO: ESP_GATTS_DISCONNECT_EVT, disconnect reason 0x13
+I (73827) GATTS_DEMO: ESP_GATTS_CONNECT_EVT, conn_id 0, remote 7b:d8:84:1d:18:59:
+I (73827) GATTS_DEMO: CONNECT_EVT, conn_id 0, remote 7b:d8:84:1d:18:59:
+I (73877) GATTS_DEMO: packet length updated: rx = 27, tx = 251, status = 0
+I (74227) GATTS_DEMO: update connection params status = 0, min_int = 16, max_int = 32,conn_int = 6,latency = 0, timeout = 500
+I (74577) GATTS_DEMO: update connection params status = 0, min_int = 0, max_int = 0,conn_int = 32,latency = 0, timeout = 400
+W (187457) BT_HCI: hcif disc complete: hdl 0x1, rsn 0x13
+I (187457) GATTS_DEMO: ESP_GATTS_DISCONNECT_EVT, disconnect reason 0x13
+
+
+GATTS_DEMO: ESP_GATTS_MTU_EVT, MTU 500
+I (243637) GATTS_DEMO: update connection params status = 0, min_int = 0, max_int = 0,conn_int = 24,latency = 0, timeout = 400
+I (243667) GATTS_DEMO: packet length updated: rx = 251, tx = 251, status = 0
+
+I (296017) GATTS_DEMO: GATT_WRITE_EVT, conn_id 0, trans_id 3, handle 42
+I (296017) GATTS_DEMO: GATT_WRITE_EVT, value len 6, value :
+I (296017) GATTS_DEMO: 7a 74 67 68 37 38 
+
+if (!param->write.is_prep){
+            ESP_LOGI(GATTS_TAG, "GATT_WRITE_EVT, value len %d, value :", param->write.len);
+            esp_log_buffer_hex(GATTS_TAG, param->write.value, param->write.len);
+
+	When a write event is triggered, this example prints logging messages, and then executes the example_write_event_env() function 
+		--> void example_write_event_env(esp_gatt_if_t gatts_if ..) 
+		
+	When the client sends a Write Request or a Prepare Write Request, the server shall respond. However, if the client sends a Write Without Response command, the server does not need to reply back a response. This is checked in the write procedure by examining the value of the write.need_rsp parameter
+		
+	--> read and notify kann ich auch mit der App simulieren (siehe Konsole). Jetzt noch etwas besser verstehen, vor allem mit Zusammenhang mit SPP etc.
+
+	--> testen wie weit ich mit bluetoothctl komme	--> kann verbinden aber nicht pairen, output in bootoutput
+	
+	--> test Daten senden per BLE ?!
+		sudo gatttool --char-write-req -b 84:FC:E6:01:1A:06 -a 0x0009 -n c7e3f68520e8d5ae5acd17760a01459d  (Characteristics Value Write (Write Request) 
+	
+	testen mit Gatttool (https://blog.yekki.co.uk/ble-hacking/):
+		rolando@RolandoTestPC:~/riscv/esp-idf$ gatttool -I
+		[                 ][LE]> connect 84:FC:E6:01:1A:06
+		[84:FC:E6:01:1A:06][LE]> char-write-req 0x04 c7e3
+		Characteristic value was written successfully
+		[84:FC:E6:01:1A:06][LE]> char-write-req 0x042 0xc7e3
+		Error: Characteristic Write Request failed: Invalid handle
+		[84:FC:E6:01:1A:06][LE]> primary
+		attr handle: 0x0001, end grp handle: 0x0005 uuid: 00001801-0000-1000-8000-00805f9b34fb
+		attr handle: 0x0014, end grp handle: 0x001c uuid: 00001800-0000-1000-8000-00805f9b34fb
+		attr handle: 0x0028, end grp handle: 0x002b uuid: 000000ff-0000-1000-8000-00805f9b34fb
+		attr handle: 0x002c, end grp handle: 0xffff uuid: 000000ee-0000-1000-8000-00805f9b34fb
+		[84:FC:E6:01:1A:06][LE]> char-desc
+		handle: 0x0001, uuid: 00002800-0000-1000-8000-00805f9b34fb
+		handle: 0x0002, uuid: 00002803-0000-1000-8000-00805f9b34fb
+		handle: 0x0003, uuid: 00002a05-0000-1000-8000-00805f9b34fb
+		handle: 0x0004, uuid: 00002902-0000-1000-8000-00805f9b34fb
+		handle: 0x0014, uuid: 00002800-0000-1000-8000-00805f9b34fb
+		handle: 0x0015, uuid: 00002803-0000-1000-8000-00805f9b34fb
+		handle: 0x0016, uuid: 00002a00-0000-1000-8000-00805f9b34fb
+		handle: 0x0017, uuid: 00002803-0000-1000-8000-00805f9b34fb
+		handle: 0x0018, uuid: 00002a01-0000-1000-8000-00805f9b34fb
+		handle: 0x0019, uuid: 00002803-0000-1000-8000-00805f9b34fb
+		handle: 0x001a, uuid: 00002aa6-0000-1000-8000-00805f9b34fb
+		handle: 0x0028, uuid: 00002800-0000-1000-8000-00805f9b34fb
+		handle: 0x0029, uuid: 00002803-0000-1000-8000-00805f9b34fb
+		handle: 0x002a, uuid: 0000ff01-0000-1000-8000-00805f9b34fb
+		handle: 0x002b, uuid: 00002902-0000-1000-8000-00805f9b34fb
+		handle: 0x002c, uuid: 00002800-0000-1000-8000-00805f9b34fb
+		handle: 0x002d, uuid: 00002803-0000-1000-8000-00805f9b34fb
+		handle: 0x002e, uuid: 0000ee01-0000-1000-8000-00805f9b34fb
+		handle: 0x002f, uuid: 00002902-0000-1000-8000-00805f9b34fb
+		[84:FC:E6:01:1A:06][LE]> char-read-hnd 0x0001
+		Characteristic value/descriptor: 01 18 
+		[84:FC:E6:01:1A:06][LE]> char-read-hnd 0x0002
+		Characteristic value/descriptor: 20 03 00 05 2a 
+		[84:FC:E6:01:1A:06][LE]> char-read-hnd 0x0003
+		Error: Characteristic value/descriptor read failed: Attribute can't be read
+		[84:FC:E6:01:1A:06][LE]> char-read-hnd 0x0004
+		Characteristic value/descriptor: c7 e3 
+		[84:FC:E6:01:1A:06][LE]> char-read-hnd 0x0014
+		Characteristic value/descriptor: 00 18 
+		[84:FC:E6:01:1A:06][LE]> char-read-hnd 0x0015
+		Characteristic value/descriptor: 02 16 00 00 2a 
+		[84:FC:E6:01:1A:06][LE]> char-read-hnd 0x0016
+		Characteristic value/descriptor: 52 6f 6c 61 6e 64 6f 73 5f 45 53 50 5f 47 61 74 74 2d 73 65 72 76 65 72 
+		[84:FC:E6:01:1A:06][LE]> char-read-hnd 0x0017
+		Characteristic value/descriptor: 02 18 00 01 2a 
+		[84:FC:E6:01:1A:06][LE]> char-read-hnd 0x0018
+		Characteristic value/descriptor: 00 00 
+		[84:FC:E6:01:1A:06][LE]> char-read-hnd 0x0019
+		Characteristic value/descriptor: 02 1a 00 a6 2a 
+		[84:FC:E6:01:1A:06][LE]> char-read-hnd 0x001a
+		Characteristic value/descriptor: 00 
+		[84:FC:E6:01:1A:06][LE]> char-read-hnd 0x0028
+		Characteristic value/descriptor: ff 00 
+		[84:FC:E6:01:1A:06][LE]> char-read-hnd 0x002e
+		Characteristic value/descriptor: de ed be ef 
+		[84:FC:E6:01:1A:06][LE]> char-read-hnd 0x002f
+		Characteristic value/descriptor: de ed be ef
+	
+			--> was ist ein handle und wie finde ich passende Werte heraus ?!
+			es gibt Service handle, Characteristic handle, Client Characteristic Configuration descriptor handle
+			" The service has a handle and an ID, in the same manner that each characteristic has a handle, an UUID, attribute permissions and properties. ... Client Characteristic Configuration descriptor (CCCD) also has a handle and an UUID.
+			ESP_LOGI(GATTS_TAG, "CREATE_SERVICE_EVT, status %d, service_handle %d", param->create.status, param->create.service_handle);
+     gl_profile_tab[PROFILE_A_APP_ID].service_handle = param->create.service_handle;
+     
+     ... the service handle generated by the BLE stack is stored in the profile table, which will be used later by the application layer to refer to this service.
+     .. The service is started using the esp_ble_gatts_start_service() function with the service handle previously generated
+     ... Adding a characteristic to a service triggers an ESP_GATTS_ADD_CHAR_EVT event, which returns the handle generated by the stack for the characteristic just added. 
+uint16_t attr_handle;	           /*!< Characteristic attribute handle */
+uint16_t service_handle;           /*!< Service attribute handle */
+	the attribute handle returned by the event is stored in the profile table
+	
+	ESP_LOGI(GATTS_TAG, "ADD_CHAR_EVT, status %d,  attr_handle %d, service_handle %d", param->add_char.status, param->add_char.attr_handle, param->add_char.service_handle);
+	
+	(When the services and characteristics are created and started, the program can receive read and write events.)
+	
+	... The procedure now prepares the response of type esp_gatt_rsp_t to be sent back to the client. The response it constructed using the same parameters of the write request, such as length, handle and offset.
+	
+	Auszug: I (487) GATTS_DEMO: CREATE_SERVICE_EVT, status 0,  service_handle 40
+		I (507) GATTS_DEMO: ADD_CHAR_EVT, status 0,  attr_handle 42, service_handle 40
+		I (537) GATTS_DEMO: ADD_DESCR_EVT, status 0, attr_handle 43, service_handle 40
+		I (567) GATTS_DEMO: ADD_CHAR_EVT, status 0,  attr_handle 46, service_handle 44
+		
+		
+		stackoverflow: You can only find the value by doing service/characteristic discovery for that cached device. Typically the UUID is what is used at the key to find a characteristics value.
+		
+		Within a GATT server, the growing values of handles determine the ordered sequence of attributes that a client can access. But gaps between handles are allowed, so a client cannot rely on a contiguous sequence to guess the location of the next attribute. Instead, the client must use the discovery feature (Service and Characteristic Discovery) to obtain the handles of the attributes it is interested in.
+
+woher kommt param->write.value ?		
+
+/* write request data */
+typedef struct {
+    UINT16          handle;     /* attribute handle */
+    UINT16          offset;     /* attribute value offset, if no offset is needed for the command, ignore it */
+    UINT16          len;        /* length of attribute value */
+    UINT8           value[GATT_MAX_ATTR_LEN];  /* the actual attribute value */
+    BOOLEAN         need_rsp;   /* need write response */
+    BOOLEAN         is_prep;    /* is prepare write */
+} tGATT_WRITE_REQ;
+
+
+vermutlich aus btc_gatts.c :
+case BTA_GATTS_WRITE_EVT: {
+        gatts_if = BTC_GATT_GET_GATT_IF(p_data->req_data.conn_id);
+        param.write.conn_id = BTC_GATT_GET_CONN_ID(p_data->req_data.conn_id);
+        param.write.trans_id = p_data->req_data.trans_id;
+        memcpy(param.write.bda, p_data->req_data.remote_bda, ESP_BD_ADDR_LEN);
+        if (p_data->req_data.p_data == NULL) {
+            break;
+        }
+        param.write.handle = p_data->req_data.p_data->write_req.handle;
+        param.write.offset = p_data->req_data.p_data->write_req.offset;
+        param.write.need_rsp = p_data->req_data.p_data->write_req.need_rsp;
+        param.write.is_prep = p_data->req_data.p_data->write_req.is_prep;
+        param.write.len = p_data->req_data.p_data->write_req.len;
+        param.write.value = p_data->req_data.p_data->write_req.value;
+
+        btc_gatts_cb_to_app(ESP_GATTS_WRITE_EVT, gatts_if, &param);
+
+
+	next: Debuggen um Verständnis für Funktionen zu erhalten!
+	

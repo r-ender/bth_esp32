@@ -1,0 +1,1112 @@
+rolando@RolandoTestPC:~/riscv/bluedroid/ble/ble_spp_client$ idf.py qemu monitor
+Running qemu on socket://localhost:5555
+Adding "qemu"'s dependency "all" to list of commands with default set of options.
+Executing action: all (aliases: build)
+Running ninja in directory /home/rolando/riscv/bluedroid/ble/ble_spp_client/build
+Executing "ninja all"...
+[1/4] cd /home/rolando/riscv/bluedroid/ble/ble_spp_client/build/esp-i.../rolando/riscv/bluedroid/ble/ble_spp_client/build/spp_client_demo.bin
+spp_client_demo.bin binary size 0xcc8d0 bytes. Smallest app partition is 0x100000 bytes. 0x33730 bytes (20%) free.
+[1/1] cd /home/rolando/riscv/bluedroid/ble/ble_spp_client/build/bootl...do/riscv/bluedroid/ble/ble_spp_client/build/bootloader/bootloader.bin
+Bootloader binary size 0x5180 bytes. 0x2e80 bytes (36%) free.
+Executing action: qemu
+Generating flash image: /home/rolando/riscv/bluedroid/ble/ble_spp_client/build/flash_image.bin
+esptool.py --chip=esp32c3 merge_bin --output=/home/rolando/riscv/bluedroid/ble/ble_spp_client/build/flash_image.bin --fill-flash-size=2MB --flash_mode dio --flash_freq 80m --flash_size 2MB 0x0 bootloader/bootloader.bin 0x10000 spp_client_demo.bin 0x8000 partition_table/partition-table.bin
+esptool.py v4.8.dev4
+SHA digest in image updated
+Wrote 0x200000 bytes to file /home/rolando/riscv/bluedroid/ble/ble_spp_client/build/flash_image.bin, ready to flash to offset 0x0
+Generating efuse image: /home/rolando/riscv/bluedroid/ble/ble_spp_client/build/qemu_efuse.bin
+Running qemu (bg): qemu-system-riscv32 -M esp32c3 -drive file=/home/rolando/riscv/bluedroid/ble/ble_spp_client/build/flash_image.bin,if=mtd,format=raw -drive file=/home/rolando/riscv/bluedroid/ble/ble_spp_client/build/qemu_efuse.bin,if=none,format=raw,id=efuse -global driver=nvram.esp32c3.efuse,property=drive,value=efuse -global driver=timer.esp32c3.timg,property=wdt_disable,value=true -nic user,model=open_eth -nographic -serial tcp::5555,server
+Executing action: monitor
+Running idf_monitor in directory /home/rolando/riscv/bluedroid/ble/ble_spp_client
+Executing "/home/rolando/.espressif/python_env/idf5.3_py3.10_env/bin/python /home/rolando/riscv/esp-idf/tools/idf_monitor.py -p socket://localhost:5555 -b 115200 --toolchain-prefix riscv32-esp-elf- --target esp32c3 --revision 3 --decode-panic backtrace /home/rolando/riscv/bluedroid/ble/ble_spp_client/build/spp_client_demo.elf -m '/home/rolando/.espressif/python_env/idf5.3_py3.10_env/bin/python' '/home/rolando/riscv/esp-idf/tools/idf.py'"...
+--- esp-idf-monitor 1.4.0 on socket://localhost:5555 115200 ---
+--- Quit: Ctrl+] | Menu: Ctrl+T | Help: Ctrl+T followed by Ctrl+H ---
+I (329) sleep: Configure to isolate all GPIO pins in sleep state
+I (331) sleep: Enable automatic switching of GPIO sleep configuration
+I (334) coexist: coex firmware version: dab85ae96
+I (339) coexist: coexist rom version 9387209
+I (349) main_task: Started on CPU0
+I (349) main_task: Calling app_main()
+I (379) BLE_INIT: BT controller compile version [ba3b3e3]
+
+assert failed: btdm_low_power_mode_init bt.c:1277 (select_src_ret && set_div_ret)
+Stack dump detected
+Core  0 register dump:
+MEPC    : 0x40380812  RA      : 0x4038aea4  SP      : 0x3fc9cdc0  GP      : 0x3fc93a00  
+0x40380812: panic_abort at /home/rolando/riscv/esp-idf/components/esp_system/panic.c:463
+0x4038aea4: __ubsan_include at /home/rolando/riscv/esp-idf/components/esp_system/ubsan.c:311
+
+TP      : 0x3fc9cfd0  T0      : 0x37363534  T1      : 0x7271706f  T2      : 0x33323130  
+S0/FP   : 0x00000076  S1      : 0x00000001  A0      : 0x3fc9cdfc  A1      : 0x3fc94bb5  
+A2      : 0x00000001  A3      : 0x00000029  A4      : 0x00000001  A5      : 0x3fc96000  
+A6      : 0x7a797877  A7      : 0x76757473  S2      : 0x00000009  S3      : 0x3fc9cf21  
+S4      : 0x3fc94bb4  S5      : 0x00000000  S6      : 0x00000000  S7      : 0x00000000  
+S8      : 0x00000000  S9      : 0x00000000  S10     : 0x00000000  S11     : 0x00000000  
+T3      : 0x6e6d6c6b  T4      : 0x6a696867  T5      : 0x66656463  T6      : 0x62613938  
+MSTATUS : 0x00001880  MTVEC   : 0x40380001  MCAUSE  : 0x00000007  MTVAL   : 0x00000000  
+0x40380001: _vector_table at /home/rolando/riscv/esp-idf/components/riscv/vectors_intc.S:54
+
+MHARTID : 0x00000000  
+
+
+Backtrace:
+
+
+panic_abort (details=details@entry=0x3fc9cdfc "assert failed: btdm_low_power_mode_init bt.c:1277 (select_src_ret && set_div_ret)") at /home/rolando/riscv/esp-idf/components/esp_system/panic.c:463
+463	    *((volatile int *) 0) = 0; // NOLINT(clang-analyzer-core.NullDereference) should be an invalid operation on targets
+#0  panic_abort (details=details@entry=0x3fc9cdfc "assert failed: btdm_low_power_mode_init bt.c:1277 (select_src_ret && set_div_ret)") at /home/rolando/riscv/esp-idf/components/esp_system/panic.c:463
+#1  0x4038aea4 in esp_system_abort (details=details@entry=0x3fc9cdfc "assert failed: btdm_low_power_mode_init bt.c:1277 (select_src_ret && set_div_ret)") at /home/rolando/riscv/esp-idf/components/esp_system/port/esp_system_chip.c:92
+#2  0x40391b06 in __assert_func (file=file@entry=0x3c0a5ed7 "", line=line@entry=1277, func=<optimized out>, func@entry=0x3c0bb12c <__func__.1> "", expr=expr@entry=0x3c0a6204 "") at /home/rolando/riscv/esp-idf/components/newlib/assert.c:80
+#3  0x4200cf56 in btdm_low_power_mode_init (cfg=cfg@entry=0x3fc9cf30) at /home/rolando/riscv/esp-idf/components/bt/controller/esp32c3/bt.c:1277
+#4  0x4200d326 in esp_bt_controller_init (cfg=cfg@entry=0x3fc9cf30) at /home/rolando/riscv/esp-idf/components/bt/controller/esp32c3/bt.c:1394
+#5  0x4200c46a in app_main () at /home/rolando/riscv/bluedroid/ble/ble_spp_client/main/spp_client_demo.c:615
+#6  0x420936e8 in main_task (args=<error reading variable: value has been optimized out>) at /home/rolando/riscv/esp-idf/components/freertos/app_startup.c:208
+#7  0x4038bece in vPortTaskWrapper (pxCode=<optimized out>, pvParameters=<optimized out>) at /home/rolando/riscv/esp-idf/components/freertos/FreeRTOS-Kernel/portable/riscv/port.c:255
+ELF file SHA256: 258a69149
+
+Rebooting...
+ESP-ROM:esp32c3-api1-20210207
+Build:Feb  7 2021
+rst:0xc (RTC_SW_CPU_RST),boot:0x8 (SPI_FAST_FLASH_BOOT)
+SPIWP:0xee
+mode:DIO, clock div:1
+load:0x3fcd5820,len:0x1738
+load:0x403cc710,len:0xb9c
+load:0x403ce710,len:0x2e4c
+entry 0x403cc71a
+I (1041) boot: ESP-IDF v5.3 2nd stage bootloader
+I (1042) boot: compile time Aug 26 2024 15:20:27
+I (1050) boot: chip revision: v0.3
+I (1053) boot.esp32c3: SPI Speed      : 80MHz
+I (1055) boot.esp32c3: SPI Mode       : SLOW READ
+I (1057) boot.esp32c3: SPI Flash Size : 2MB
+I (1066) boot: Enabling RNG early entropy source...
+I (1077) boot: Partition Table:
+I (1078) boot: ## Label            Usage          Type ST Offset   Length
+I (1079) boot:  0 nvs              WiFi data        01 02 00009000 00006000
+I (1081) boot:  1 phy_init         RF data          01 01 0000f000 00001000
+I (1082) boot:  2 factory          factory app      00 00 00010000 00100000
+I (1084) boot: End of partition table
+I (1087) esp_image: segment 0: paddr=00010020 vaddr=3c0a0020 size=22e1ch (142876) map
+I (1176) esp_image: segment 1: paddr=00032e44 vaddr=3fc93200 size=025a8h (  9640) load
+I (1185) esp_image: segment 2: paddr=000353f4 vaddr=40380000 size=0ac24h ( 44068) load
+I (1249) esp_image: segment 3: paddr=00040020 vaddr=42000020 size=9435ch (607068) map
+I (1516) esp_image: segment 4: paddr=000d4384 vaddr=4038ac24 size=08520h ( 34080) load
+I (1558) boot: Loaded app from partition at offset 0x10000
+I (1558) boot: Disabling RNG early entropy source...
+I (1567) cpu_start: Unicore app
+I (1584) cpu_start: Pro cpu start user code
+I (1584) cpu_start: cpu freq: 160000000 Hz
+I (1584) app_init: Application information:
+I (1584) app_init: Project name:     spp_client_demo
+I (1585) app_init: App version:      1
+I (1585) app_init: Compile time:     Aug 26 2024 15:20:19
+I (1585) app_init: ELF file SHA256:  258a69149...
+I (1586) app_init: ESP-IDF:          v5.3
+I (1586) efuse_init: Min chip rev:     v0.3
+I (1587) efuse_init: Max chip rev:     v1.99 
+I (1588) efuse_init: Chip rev:         v0.3
+I (1588) heap_init: Initializing. RAM available for dynamic allocation:
+I (1589) heap_init: At 3FC9A000 len 00026000 (152 KiB): RAM
+I (1590) heap_init: At 3FCC0000 len 0001C710 (113 KiB): Retention RAM
+I (1590) heap_init: At 3FCDC710 len 00002950 (10 KiB): Retention RAM
+I (1590) heap_init: At 50000200 len 00001DE8 (7 KiB): RTCRAM
+I (1598) spi_flash: detected chip: winbond
+I (1599) spi_flash: flash io: dio
+I (1600) sleep: Configure to isolate all GPIO pins in sleep state
+I (1601) sleep: Enable automatic switching of GPIO sleep configuration
+I (1601) coexist: coex firmware version: dab85ae96
+I (1602) coexist: coexist rom version 9387209
+I (1610) main_task: Started on CPU0
+I (1610) main_task: Calling app_main()
+I (1630) BLE_INIT: BT controller compile version [ba3b3e3]
+
+assert failed: btdm_low_power_mode_init bt.c:1277 (select_src_ret && set_div_ret)
+Stack dump detected
+Core  0 register dump:
+MEPC    : 0x40380812  RA      : 0x4038aea4  SP      : 0x3fc9cdc0  GP      : 0x3fc93a00  
+0x40380812: panic_abort at /home/rolando/riscv/esp-idf/components/esp_system/panic.c:463
+0x4038aea4: __ubsan_include at /home/rolando/riscv/esp-idf/components/esp_system/ubsan.c:311
+
+TP      : 0x3fc9cfd0  T0      : 0x37363534  T1      : 0x7271706f  T2      : 0x33323130  
+S0/FP   : 0x00000076  S1      : 0x00000001  A0      : 0x3fc9cdfc  A1      : 0x3fc94bb5  
+A2      : 0x00000001  A3      : 0x00000029  A4      : 0x00000001  A5      : 0x3fc96000  
+A6      : 0x7a797877  A7      : 0x76757473  S2      : 0x00000009  S3      : 0x3fc9cf21  
+S4      : 0x3fc94bb4  S5      : 0x00000000  S6      : 0x00000000  S7      : 0x00000000  
+S8      : 0x00000000  S9      : 0x00000000  S10     : 0x00000000  S11     : 0x00000000  
+T3      : 0x6e6d6c6b  T4      : 0x6a696867  T5      : 0x66656463  T6      : 0x62613938  
+MSTATUS : 0x00001880  MTVEC   : 0x40380001  MCAUSE  : 0x00000007  MTVAL   : 0x00000000  
+0x40380001: _vector_table at /home/rolando/riscv/esp-idf/components/riscv/vectors_intc.S:54
+
+MHARTID : 0x00000000  
+
+
+Backtrace:
+
+
+panic_abort (details=details@entry=0x3fc9cdfc "assert failed: btdm_low_power_mode_init bt.c:1277 (select_src_ret && set_div_ret)") at /home/rolando/riscv/esp-idf/components/esp_system/panic.c:463
+463	    *((volatile int *) 0) = 0; // NOLINT(clang-analyzer-core.NullDereference) should be an invalid operation on targets
+#0  panic_abort (details=details@entry=0x3fc9cdfc "assert failed: btdm_low_power_mode_init bt.c:1277 (select_src_ret && set_div_ret)") at /home/rolando/riscv/esp-idf/components/esp_system/panic.c:463
+#1  0x4038aea4 in esp_system_abort (details=details@entry=0x3fc9cdfc "assert failed: btdm_low_power_mode_init bt.c:1277 (select_src_ret && set_div_ret)") at /home/rolando/riscv/esp-idf/components/esp_system/port/esp_system_chip.c:92
+#2  0x40391b06 in __assert_func (file=file@entry=0x3c0a5ed7 "", line=line@entry=1277, func=<optimized out>, func@entry=0x3c0bb12c <__func__.1> "", expr=expr@entry=0x3c0a6204 "") at /home/rolando/riscv/esp-idf/components/newlib/assert.c:80
+#3  0x4200cf56 in btdm_low_power_mode_init (cfg=cfg@entry=0x3fc9cf30) at /home/rolando/riscv/esp-idf/components/bt/controller/esp32c3/bt.c:1277
+#4  0x4200d326 in esp_bt_controller_init (cfg=cfg@entry=0x3fc9cf30) at /home/rolando/riscv/esp-idf/components/bt/controller/esp32c3/bt.c:1394
+#5  0x4200c46a in app_main () at /home/rolando/riscv/bluedroid/ble/ble_spp_client/main/spp_client_demo.c:615
+#6  0x420936e8 in main_task (args=<error reading variable: value has been optimized out>) at /home/rolando/riscv/esp-idf/components/freertos/app_startup.c:208
+#7  0x4038bece in vPortTaskWrapper (pxCode=<optimized out>, pvParameters=<optimized out>) at /home/rolando/riscv/esp-idf/components/freertos/FreeRTOS-Kernel/portable/riscv/port.c:255
+ELF file SHA256: 258a69149
+
+Rebooting...
+ESP-ROM:esp32c3-api1-20210207
+Build:Feb  7 2021
+rst:0xc (RTC_SW_CPU_RST),boot:0x8 (SPI_FAST_FLASH_BOOT)
+SPIWP:0xee
+mode:DIO, clock div:1
+load:0x3fcd5820,len:0x1738
+load:0x403cc710,len:0xb9c
+load:0x403ce710,len:0x2e4c
+entry 0x403cc71a
+I (3526) boot: ESP-IDF v5.3 2nd stage bootloader
+I (3527) boot: compile time Aug 26 2024 15:20:27
+I (3535) boot: chip revision: v0.3
+I (3538) boot.esp32c3: SPI Speed      : 80MHz
+I (3539) boot.esp32c3: SPI Mode       : SLOW READ
+I (3540) boot.esp32c3: SPI Flash Size : 2MB
+I (3549) boot: Enabling RNG early entropy source...
+I (3559) boot: Partition Table:
+I (3560) boot: ## Label            Usage          Type ST Offset   Length
+I (3561) boot:  0 nvs              WiFi data        01 02 00009000 00006000
+I (3562) boot:  1 phy_init         RF data          01 01 0000f000 00001000
+I (3564) boot:  2 factory          factory app      00 00 00010000 00100000
+I (3565) boot: End of partition table
+I (3568) esp_image: segment 0: paddr=00010020 vaddr=3c0a0020 size=22e1ch (142876) map
+I (3655) esp_image: segment 1: paddr=00032e44 vaddr=3fc93200 size=025a8h (  9640) load
+I (3665) esp_image: segment 2: paddr=000353f4 vaddr=40380000 size=0ac24h ( 44068) load
+I (3701) esp_image: segment 3: paddr=00040020 vaddr=42000020 size=9435ch (607068) map
+I (3935) esp_image: segment 4: paddr=000d4384 vaddr=4038ac24 size=08520h ( 34080) load
+I (3975) boot: Loaded app from partition at offset 0x10000
+I (3976) boot: Disabling RNG early entropy source...
+I (3986) cpu_start: Unicore app
+I (4002) cpu_start: Pro cpu start user code
+I (4002) cpu_start: cpu freq: 160000000 Hz
+I (4002) app_init: Application information:
+I (4002) app_init: Project name:     spp_client_demo
+I (4003) app_init: App version:      1
+I (4003) app_init: Compile time:     Aug 26 2024 15:20:19
+I (4004) app_init: ELF file SHA256:  258a69149...
+I (4004) app_init: ESP-IDF:          v5.3
+I (4004) efuse_init: Min chip rev:     v0.3
+I (4005) efuse_init: Max chip rev:     v1.99 
+I (4005) efuse_init: Chip rev:         v0.3
+I (4005) heap_init: Initializing. RAM available for dynamic allocation:
+I (4006) heap_init: At 3FC9A000 len 00026000 (152 KiB): RAM
+I (4007) heap_init: At 3FCC0000 len 0001C710 (113 KiB): Retention RAM
+I (4007) heap_init: At 3FCDC710 len 00002950 (10 KiB): Retention RAM
+I (4008) heap_init: At 50000200 len 00001DE8 (7 KiB): RTCRAM
+I (4019) spi_flash: detected chip: winbond
+I (4020) spi_flash: flash io: dio
+I (4023) sleep: Configure to isolate all GPIO pins in sleep state
+I (4024) sleep: Enable automatic switching of GPIO sleep configuration
+I (4024) coexist: coex firmware version: dab85ae96
+I (4026) coexist: coexist rom version 9387209
+I (4032) main_task: Started on CPU0
+I (4032) main_task: Calling app_main()
+I (4052) BLE_INIT: BT controller compile version [ba3b3e3]
+
+assert failed: btdm_low_power_mode_init bt.c:1277 (select_src_ret && set_div_ret)
+Stack dump detected
+Core  0 register dump:
+MEPC    : 0x40380812  RA      : 0x4038aea4  SP      : 0x3fc9cdc0  GP      : 0x3fc93a00  
+0x40380812: panic_abort at /home/rolando/riscv/esp-idf/components/esp_system/panic.c:463
+0x4038aea4: __ubsan_include at /home/rolando/riscv/esp-idf/components/esp_system/ubsan.c:311
+
+TP      : 0x3fc9cfd0  T0      : 0x37363534  T1      : 0x7271706f  T2      : 0x33323130  
+S0/FP   : 0x00000076  S1      : 0x00000001  A0      : 0x3fc9cdfc  A1      : 0x3fc94bb5  
+A2      : 0x00000001  A3      : 0x00000029  A4      : 0x00000001  A5      : 0x3fc96000  
+A6      : 0x7a797877  A7      : 0x76757473  S2      : 0x00000009  S3      : 0x3fc9cf21  
+S4      : 0x3fc94bb4  S5      : 0x00000000  S6      : 0x00000000  S7      : 0x00000000  
+S8      : 0x00000000  S9      : 0x00000000  S10     : 0x00000000  S11     : 0x00000000  
+T3      : 0x6e6d6c6b  T4      : 0x6a696867  T5      : 0x66656463  T6      : 0x62613938  
+MSTATUS : 0x00001880  MTVEC   : 0x40380001  MCAUSE  : 0x00000007  MTVAL   : 0x00000000  
+0x40380001: _vector_table at /home/rolando/riscv/esp-idf/components/riscv/vectors_intc.S:54
+
+MHARTID : 0x00000000  
+
+
+Backtrace:
+
+
+panic_abort (details=details@entry=0x3fc9cdfc "assert failed: btdm_low_power_mode_init bt.c:1277 (select_src_ret && set_div_ret)") at /home/rolando/riscv/esp-idf/components/esp_system/panic.c:463
+463	    *((volatile int *) 0) = 0; // NOLINT(clang-analyzer-core.NullDereference) should be an invalid operation on targets
+#0  panic_abort (details=details@entry=0x3fc9cdfc "assert failed: btdm_low_power_mode_init bt.c:1277 (select_src_ret && set_div_ret)") at /home/rolando/riscv/esp-idf/components/esp_system/panic.c:463
+#1  0x4038aea4 in esp_system_abort (details=details@entry=0x3fc9cdfc "assert failed: btdm_low_power_mode_init bt.c:1277 (select_src_ret && set_div_ret)") at /home/rolando/riscv/esp-idf/components/esp_system/port/esp_system_chip.c:92
+#2  0x40391b06 in __assert_func (file=file@entry=0x3c0a5ed7 "", line=line@entry=1277, func=<optimized out>, func@entry=0x3c0bb12c <__func__.1> "", expr=expr@entry=0x3c0a6204 "") at /home/rolando/riscv/esp-idf/components/newlib/assert.c:80
+#3  0x4200cf56 in btdm_low_power_mode_init (cfg=cfg@entry=0x3fc9cf30) at /home/rolando/riscv/esp-idf/components/bt/controller/esp32c3/bt.c:1277
+#4  0x4200d326 in esp_bt_controller_init (cfg=cfg@entry=0x3fc9cf30) at /home/rolando/riscv/esp-idf/components/bt/controller/esp32c3/bt.c:1394
+#5  0x4200c46a in app_main () at /home/rolando/riscv/bluedroid/ble/ble_spp_client/main/spp_client_demo.c:615
+#6  0x420936e8 in main_task (args=<error reading variable: value has been optimized out>) at /home/rolando/riscv/esp-idf/components/freertos/app_startup.c:208
+#7  0x4038bece in vPortTaskWrapper (pxCode=<optimized out>, pvParameters=<optimized out>) at /home/rolando/riscv/esp-idf/components/freertos/FreeRTOS-Kernel/portable/riscv/port.c:255
+ELF file SHA256: 258a69149
+
+Rebooting...
+ESP-ROM:esp32c3-api1-20210207
+
+____________________________________________________
+
+
+target-flash:
+rolando@RolandoTestPC:~/riscv/bluedroid/ble/ble_spp_client$ idf.py flash
+Executing action: flash
+Serial port /dev/ttyUSB0
+Connecting....
+Detecting chip type... ESP32-C3
+Running ninja in directory /home/rolando/riscv/bluedroid/ble/ble_spp_client/build
+Executing "ninja flash"...
+[1/5] cd /home/rolando/riscv/bluedroid/ble/ble_spp_client/build/esp-i.../rolando/riscv/bluedroid/ble/ble_spp_client/build/spp_client_demo.bin
+spp_client_demo.bin binary size 0xcc8d0 bytes. Smallest app partition is 0x100000 bytes. 0x33730 bytes (20%) free.
+[1/1] cd /home/rolando/riscv/bluedroid/ble/ble_spp_client/build/bootl...do/riscv/bluedroid/ble/ble_spp_client/build/bootloader/bootloader.bin
+Bootloader binary size 0x5180 bytes. 0x2e80 bytes (36%) free.
+[2/3] cd /home/rolando/riscv/esp-idf/components/esptool_py && /usr/bi...ome/rolando/riscv/esp-idf/components/esptool_py/run_serial_tool.cmake
+esptool.py --chip esp32c3 -p /dev/ttyUSB0 -b 460800 --before=default_reset --after=hard_reset write_flash --flash_mode dio --flash_freq 80m --flash_size 2MB 0x0 bootloader/bootloader.bin 0x10000 spp_client_demo.bin 0x8000 partition_table/partition-table.bin
+esptool.py v4.8.dev4
+Serial port /dev/ttyUSB0
+Connecting....
+Chip is ESP32-C3 (QFN32) (revision v0.4)
+Features: WiFi, BLE, Embedded Flash 4MB (XMC)
+Crystal is 40MHz
+MAC: 84:fc:e6:01:1a:04
+Uploading stub...
+Running stub...
+Stub running...
+Changing baud rate to 460800
+Changed.
+Configuring flash size...
+Flash will be erased from 0x00000000 to 0x00005fff...
+Flash will be erased from 0x00010000 to 0x000dcfff...
+Flash will be erased from 0x00008000 to 0x00008fff...
+SHA digest in image updated
+Compressed 20864 bytes to 12759...
+Writing at 0x00000000... (100 %)
+Wrote 20864 bytes (12759 compressed) at 0x00000000 in 0.6 seconds (effective 258.1 kbit/s)...
+Hash of data verified.
+Compressed 837840 bytes to 426520...
+Writing at 0x000dc369... (100 %)
+Wrote 837840 bytes (426520 compressed) at 0x00010000 in 12.9 seconds (effective 520.5 kbit/s)...
+Hash of data verified.
+Compressed 3072 bytes to 103...
+Writing at 0x00008000... (100 %)
+Wrote 3072 bytes (103 compressed) at 0x00008000 in 0.1 seconds (effective 425.7 kbit/s)...
+Hash of data verified.
+
+Leaving...
+Hard resetting via RTS pin...
+Done
+
+
+
+output:
+rolando@RolandoTestPC:~/riscv/bluedroid/ble/ble_spp_client$ idf.py monitor
+Executing action: monitor
+Serial port /dev/ttyUSB0
+Connecting....
+Detecting chip type... ESP32-C3
+Running idf_monitor in directory /home/rolando/riscv/bluedroid/ble/ble_spp_client
+Executing "/home/rolando/.espressif/python_env/idf5.3_py3.10_env/bin/python /home/rolando/riscv/esp-idf/tools/idf_monitor.py -p /dev/ttyUSB0 -b 115200 --toolchain-prefix riscv32-esp-elf- --target esp32c3 --revision 3 --decode-panic backtrace /home/rolando/riscv/bluedroid/ble/ble_spp_client/build/spp_client_demo.elf -m '/home/rolando/.espressif/python_env/idf5.3_py3.10_env/bin/python' '/home/rolando/riscv/esp-idf/tools/idf.py'"...
+--- esp-idf-monitor 1.4.0 on /dev/ttyUSB0 115200 ---
+--- Quit: Ctrl+] | Menu: Ctrl+T | Help: Ctrl+T followed by Ctrl+H ---
+ESP-ROM:esp32c3-api1-20210207
+Build:Feb  7 2021
+rst:0x1 (POWERON),boot:0xd (SPI_FAST_FLASH_BOOT)
+SPIWP:0xee
+mode:DIO, clock div:1
+load:0x3fcd5820,len:0x1738
+load:0x403cc710,len:0xb9c
+load:0x403ce710,len:0x2e4c
+entry 0x403cc71a
+I (30) boot: ESP-IDF v5.3 2nd stage bootloader
+I (30) boot: compile time Aug 26 2024 15:20:27
+I (30) boot: chip revision: v0.4
+I (33) boot.esp32c3: SPI Speed      : 80MHz
+I (38) boot.esp32c3: SPI Mode       : DIO
+I (43) boot.esp32c3: SPI Flash Size : 2MB
+I (47) boot: Enabling RNG early entropy source...
+I (53) boot: Partition Table:
+I (56) boot: ## Label            Usage          Type ST Offset   Length
+I (64) boot:  0 nvs              WiFi data        01 02 00009000 00006000
+I (71) boot:  1 phy_init         RF data          01 01 0000f000 00001000
+I (78) boot:  2 factory          factory app      00 00 00010000 00100000
+I (86) boot: End of partition table
+I (90) esp_image: segment 0: paddr=00010020 vaddr=3c0a0020 size=22e1ch (142876) map
+I (121) esp_image: segment 1: paddr=00032e44 vaddr=3fc93200 size=025a8h (  9640) load
+I (123) esp_image: segment 2: paddr=000353f4 vaddr=40380000 size=0ac24h ( 44068) load
+I (135) esp_image: segment 3: paddr=00040020 vaddr=42000020 size=9435ch (607068) map
+I (230) esp_image: segment 4: paddr=000d4384 vaddr=4038ac24 size=08520h ( 34080) load
+I (243) boot: Loaded app from partition at offset 0x10000
+I (243) boot: Disabling RNG early entropy source...
+I (254) cpu_start: Unicore app
+I (263) cpu_start: Pro cpu start user code
+I (263) cpu_start: cpu freq: 160000000 Hz
+I (263) app_init: Application information:
+I (266) app_init: Project name:     spp_client_demo
+I (271) app_init: App version:      1
+I (276) app_init: Compile time:     Aug 26 2024 15:20:19
+I (282) app_init: ELF file SHA256:  258a69149...
+I (287) app_init: ESP-IDF:          v5.3
+I (292) efuse_init: Min chip rev:     v0.3
+I (296) efuse_init: Max chip rev:     v1.99 
+I (301) efuse_init: Chip rev:         v0.4
+I (306) heap_init: Initializing. RAM available for dynamic allocation:
+I (314) heap_init: At 3FC9A000 len 00026000 (152 KiB): RAM
+I (320) heap_init: At 3FCC0000 len 0001C710 (113 KiB): Retention RAM
+I (327) heap_init: At 3FCDC710 len 00002950 (10 KiB): Retention RAM
+I (334) heap_init: At 50000200 len 00001DE8 (7 KiB): RTCRAM
+I (341) spi_flash: detected chip: generic
+I (345) spi_flash: flash io: dio
+W (348) spi_flash: Detected size(4096k) larger than the size in the binary image header(2048k). Using the size in the binary image header.
+I (362) sleep: Configure to isolate all GPIO pins in sleep state
+I (368) sleep: Enable automatic switching of GPIO sleep configuration
+I (375) coexist: coex firmware version: dab85ae96
+I (390) coexist: coexist rom version 9387209
+I (391) main_task: Started on CPU0
+I (391) main_task: Calling app_main()
+I (391) BLE_INIT: BT controller compile version [ba3b3e3]
+I (401) BLE_INIT: Bluetooth MAC: 84:fc:e6:01:1a:06
+I (401) phy_init: phy_version 1180,01f2a49,Jun  4 2024,16:34:25
+W (441) phy_init: saving new calibration data because of checksum failure, mode(0)
+I (451) GATTC_SPP_DEMO: app_main init bluetooth
+I (471) GATTC_SPP_DEMO: register callback
+I (471) GATTC_SPP_DEMO: EVT 0, gattc if 3
+I (471) GATTC_SPP_DEMO: REG EVT, set scan params
+I (471) GATTC_SPP_DEMO: Enable Ble Scan:during time ff��I (491) main_task: Returned from app_main()
+I (541) GATTC_SPP_DEMO: 74 1c 14 0a 00 c7 
+I (541) GATTC_SPP_DEMO: Searched Adv Data Len 18, Scan Response Len 21
+I (541) GATTC_SPP_DEMO: Searched Device Name Len 0
+I (541) GATTC_SPP_DEMO:  
+I (661) GATTC_SPP_DEMO: 56 b0 e0 16 76 74 
+I (661) GATTC_SPP_DEMO: Searched Adv Data Len 17, Scan Response Len 0
+I (661) GATTC_SPP_DEMO: Searched Device Name Len 0
+I (671) GATTC_SPP_DEMO:  
+I (791) GATTC_SPP_DEMO: 5b 4f 3b 30 d7 41 
+I (791) GATTC_SPP_DEMO: Searched Adv Data Len 19, Scan Response Len 21
+I (791) GATTC_SPP_DEMO: Searched Device Name Len 0
+I (801) GATTC_SPP_DEMO:  
+I (831) GATTC_SPP_DEMO: fc 03 9f f0 63 93 
+I (831) GATTC_SPP_DEMO: Searched Adv Data Len 28, Scan Response Len 0
+I (831) GATTC_SPP_DEMO: Searched Device Name Len 0
+I (841) GATTC_SPP_DEMO:  
+
+
+-----------------------------------------------------------
+
+spp_client mit debug output:
+ESP-ROM:esp32c3-api1-20210207
+Build:Feb  7 2021
+rst:0x1 (POWERON),boot:0xd (SPI_FAST_FLASH_BOOT)
+SPIWP:0xee
+mode:DIO, clock div:1
+load:0x3fcd5820,len:0x1738
+load:0x403cc710,len:0xb9c
+load:0x403ce710,len:0x2e4c
+entry 0x403cc71a
+I (30) boot: ESP-IDF v5.3 2nd stage bootloader
+I (30) boot: compile time Aug 26 2024 15:20:27
+I (30) boot: chip revision: v0.4
+I (33) boot.esp32c3: SPI Speed      : 80MHz
+I (38) boot.esp32c3: SPI Mode       : DIO
+I (43) boot.esp32c3: SPI Flash Size : 2MB
+I (47) boot: Enabling RNG early entropy source...
+I (53) boot: Partition Table:
+I (56) boot: ## Label            Usage          Type ST Offset   Length
+I (64) boot:  0 nvs              WiFi data        01 02 00009000 00006000
+I (71) boot:  1 phy_init         RF data          01 01 0000f000 00001000
+I (78) boot:  2 factory          factory app      00 00 00010000 00100000
+I (86) boot: End of partition table
+I (90) esp_image: segment 0: paddr=00010020 vaddr=3c0a0020 size=22fbch (143292) map
+I (121) esp_image: segment 1: paddr=00032fe4 vaddr=3fc93200 size=025a8h (  9640) load
+I (123) esp_image: segment 2: paddr=00035594 vaddr=40380000 size=0aa84h ( 43652) load
+I (135) esp_image: segment 3: paddr=00040020 vaddr=42000020 size=943d0h (607184) map
+I (230) esp_image: segment 4: paddr=000d43f8 vaddr=4038aa84 size=086c0h ( 34496) load
+I (243) boot: Loaded app from partition at offset 0x10000
+I (243) boot: Disabling RNG early entropy source...
+I (254) cpu_start: Unicore app
+I (263) cpu_start: Pro cpu start user code
+I (263) cpu_start: cpu freq: 160000000 Hz
+I (263) app_init: Application information:
+I (266) app_init: Project name:     spp_client_demo
+I (272) app_init: App version:      1
+I (276) app_init: Compile time:     Aug 26 2024 15:20:19
+I (282) app_init: ELF file SHA256:  6810d6bc1...
+I (287) app_init: ESP-IDF:          v5.3
+I (292) efuse_init: Min chip rev:     v0.3
+I (297) efuse_init: Max chip rev:     v1.99 
+I (302) efuse_init: Chip rev:         v0.4
+I (306) heap_init: Initializing. RAM available for dynamic allocation:
+I (314) heap_init: At 3FC9A000 len 00026000 (152 KiB): RAM
+I (320) heap_init: At 3FCC0000 len 0001C710 (113 KiB): Retention RAM
+I (327) heap_init: At 3FCDC710 len 00002950 (10 KiB): Retention RAM
+I (334) heap_init: At 50000200 len 00001DE8 (7 KiB): RTCRAM
+I (341) spi_flash: detected chip: generic
+I (345) spi_flash: flash io: dio
+W (349) spi_flash: Detected size(4096k) larger than the size in the binary image header(2048k). Using the size in the binary image header.
+I (362) sleep: Configure to isolate all GPIO pins in sleep state
+I (368) sleep: Enable automatic switching of GPIO sleep configuration
+I (376) coexist: coex firmware version: dab85ae96
+I (390) coexist: coexist rom version 9387209
+I (391) main_task: Started on CPU0
+I (391) main_task: Calling app_main()
+ --- this is spp_client app_main ---
+I (401) BLE_INIT: BT controller compile version [ba3b3e3]
+I (401) BLE_INIT: Bluetooth MAC: 84:fc:e6:01:1a:06
+I (401) phy_init: phy_version 1180,01f2a49,Jun  4 2024,16:34:25
+I (451) GATTC_SPP_DEMO: app_main init bluetooth
+ --- this is spp_client ble_client_appRegister ---
+I (461) GATTC_SPP_DEMO: register callback
+ --- this is spp_client esp_gattc_cb ---
+I (461) GATTC_SPP_DEMO: EVT 0, gattc if 3
+ --- this is spp_client gattc_profile_event_handler ---
+I (471) GATTC_SPP_DEMO: REG EVT, set scan params
+ --- this is spp_client esp_gap_cb ---
+I (481) GATTC_SPP_DEMO: Enable Ble Scan:during time ffff minutes.
+ --- this is spp_client esp_gap_cb ---
+I (491) GATTC_SPP_DEMO: Scan start successfully
+ --- this is spp_ --- this is spp_client uart_task ---
+I (511) main_task: Returned from app_main()
+ --- this is spp_client esp_gap_cb ---
+I (521) GATTC_SPP_DEMO: 0a 3b bc bc 35 3b 
+I (521) GATTC_SPP_DEMO: Searched Adv Data Len 31, Scan Response Len 0
+I (521) GATTC_SPP_DEMO: Searched Device Name Len 0
+I (531) GATTC_SPP_DEMO:  
+ --- this is spp_client esp_gap_cb ---
+I (601) GATTC_SPP_DEMO: 45 7c ca 70 32 7d 
+I (601) GATTC_SPP_DEMO: Searched Adv Data Len 18, Scan Response Len 0
+I (601) GATTC_SPP_DEMO: Searched Device Name Len 0
+I (611) GATTC_SPP_DEMO:  
+ --- this is spp_client esp_gap_cb ---
+I (621) GATTC_SPP_DEMO: fc 03 9f f0 63 93 
+I (621) GATTC_SPP_DEMO: Searched Adv Data Len 28, Scan Response Len 0
+I (631) GATTC_SPP_DEMO: Searched Device Name Len 0
+I (631) GATTC_SPP_DEMO:  
+ --- this is spp_client esp_gap_cb ---
+I (641) GATTC_SPP_DEMO: 8c 79 f5 12 95 53 
+I (641) GATTC_SPP_DEMO: Searched Adv Data Len 28, Scan Response Len 0
+I (651) GATTC_SPP_DEMO: Searched Device Name Len 0
+I (661) GATTC_SPP_DEMO:  
+ --- this is spp_client esp_gap_cb ---
+I (671) GATTC_SPP_DEMO: 68 c0 cd 03 38 0f 
+I (671) GATTC_SPP_DEMO: Searched Adv Data Len 18, Scan Response Len 21
+I (681) GATTC_SPP_DEMO: Searched Device Name Len 0
+I (681) GATTC_SPP_DEMO:  
+_______________________________________________________
+
+rolando@RolandoTestPC:~/riscv/gatt_client$ idf.py monitor
+Executing action: monitor
+Serial port /dev/ttyUSB0
+Connecting....
+Detecting chip type... ESP32-C3
+Running idf_monitor in directory /home/rolando/riscv/gatt_client
+Executing "/home/rolando/.espressif/python_env/idf5.3_py3.10_env/bin/python /home/rolando/riscv/esp-idf/tools/idf_monitor.py -p /dev/ttyUSB0 -b 115200 --toolchain-prefix riscv32-esp-elf- --target esp32c3 --revision 3 --decode-panic backtrace /home/rolando/riscv/gatt_client/build/gatt_client_demo.elf -m '/home/rolando/.espressif/python_env/idf5.3_py3.10_env/bin/python' '/home/rolando/riscv/esp-idf/tools/idf.py'"...
+--- esp-idf-monitor 1.4.0 on /dev/ttyUSB0 115200 ---
+--- Quit: Ctrl+] | Menu: Ctrl+T | Help: Ctrl+T followed by Ctrl+H ---
+ESP-ROM:esp32c3-api1-20210207
+Build:Feb  7 2021
+rst:0x1 (POWERON),boot:0xd (SPI_FAST_FLASH_BOOT)
+SPIWP:0xee
+mode:DIO, clock div:1
+load:0x3fcd5820,len:0x1738
+load:0x403cc710,len:0xb9c
+load:0x403ce710,len:0x2e4c
+entry 0x403cc71a
+I (30) boot: ESP-IDF v5.3 2nd stage bootloader
+I (30) boot: compile time Aug 29 2024 19:51:34
+I (30) boot: chip revision: v0.4
+I (33) boot.esp32c3: SPI Speed      : 80MHz
+I (38) boot.esp32c3: SPI Mode       : DIO
+I (43) boot.esp32c3: SPI Flash Size : 2MB
+I (47) boot: Enabling RNG early entropy source...
+I (53) boot: Partition Table:
+I (56) boot: ## Label            Usage          Type ST Offset   Length
+I (64) boot:  0 nvs              WiFi data        01 02 00009000 00006000
+I (71) boot:  1 phy_init         RF data          01 01 0000f000 00001000
+I (78) boot:  2 factory          factory app      00 00 00010000 00100000
+I (86) boot: End of partition table
+I (90) esp_image: segment 0: paddr=00010020 vaddr=3c0a0020 size=214c4h (136388) map
+I (120) esp_image: segment 1: paddr=000314ec vaddr=3fc91e00 size=02580h (  9600) load
+I (122) esp_image: segment 2: paddr=00033a74 vaddr=40380000 size=0c5a4h ( 50596) load
+I (135) esp_image: segment 3: paddr=00040020 vaddr=42000020 size=9135ch (594780) map
+I (228) esp_image: segment 4: paddr=000d1384 vaddr=4038c5a4 size=05778h ( 22392) load
+I (238) boot: Loaded app from partition at offset 0x10000
+I (239) boot: Disabling RNG early entropy source...
+I (250) cpu_start: Unicore app
+I (259) cpu_start: Pro cpu start user code
+I (259) cpu_start: cpu freq: 160000000 Hz
+I (259) app_init: Application information:
+I (262) app_init: Project name:     gatt_client_demo
+I (267) app_init: App version:      1
+I (272) app_init: Compile time:     Aug 29 2024 19:51:26
+I (278) app_init: ELF file SHA256:  5063ac813...
+I (283) app_init: ESP-IDF:          v5.3
+I (288) efuse_init: Min chip rev:     v0.3
+I (292) efuse_init: Max chip rev:     v1.99 
+I (297) efuse_init: Chip rev:         v0.4
+I (302) heap_init: Initializing. RAM available for dynamic allocation:
+I (309) heap_init: At 3FC98A40 len 000275C0 (157 KiB): RAM
+I (315) heap_init: At 3FCC0000 len 0001C710 (113 KiB): Retention RAM
+I (322) heap_init: At 3FCDC710 len 00002950 (10 KiB): Retention RAM
+I (329) heap_init: At 50000200 len 00001DE8 (7 KiB): RTCRAM
+I (337) spi_flash: detected chip: generic
+I (340) spi_flash: flash io: dio
+W (344) spi_flash: Detected size(4096k) larger than the size in the binary image header(2048k). Using the size in the binary image header.
+I (358) sleep: Configure to isolate all GPIO pins in sleep state
+I (364) sleep: Enable automatic switching of GPIO sleep configuration
+I (371) coexist: coex firmware version: dab85ae96
+I (386) coexist: coexist rom version 9387209
+I (386) main_task: Started on CPU0
+I (386) main_task: Calling app_main()
+I (386) BLE_INIT: BT controller compile version [ba3b3e3]
+I (396) BLE_INIT: Bluetooth MAC: 84:fc:e6:01:1a:06
+I (396) phy_init: phy_version 1180,01f2a49,Jun  4 2024,16:34:25
+I (446) GATTC_DEMO: REG_EVT
+I (446) GATTC_DEMO: scan start success
+I (456) main_task: Returned from app_main()
+I (516) GATTC_DEMO: fc 03 9f f0 63 93 
+I (516) GATTC_DEMO: searched Adv Data Len 28, Scan Response Len 0
+I (516) GATTC_DEMO: searched Device Name Len 0
+I (516) GATTC_DEMO:  
+I (526) GATTC_DEMO: 7d 79 55 69 8c 94 
+I (526) GATTC_DEMO: searched Adv Data Len 18, Scan Response Len 0
+I (536) GATTC_DEMO: searched Device Name Len 0
+I (536) GATTC_DEMO:  
+_____________________________________________________________________________________________
+
+rolando@RolandoTestPC:~/riscv/gatt_client$ idf.py monitor
+Executing action: monitor
+Serial port /dev/ttyUSB0
+Connecting....
+Detecting chip type... ESP32-C3
+Running idf_monitor in directory /home/rolando/riscv/gatt_client
+Executing "/home/rolando/.espressif/python_env/idf5.3_py3.10_env/bin/python /home/rolando/riscv/esp-idf/tools/idf_monitor.py -p /dev/ttyUSB0 -b 115200 --toolchain-prefix riscv32-esp-elf- --target esp32c3 --revision 3 --decode-panic backtrace /home/rolando/riscv/gatt_client/build/gatt_client_demo.elf -m '/home/rolando/.espressif/python_env/idf5.3_py3.10_env/bin/python' '/home/rolando/riscv/esp-idf/tools/idf.py'"...
+--- esp-idf-monitor 1.4.0 on /dev/ttyUSB0 115200 ---
+--- Quit: Ctrl+] | Menu: Ctrl+T | Help: Ctrl+T followed by Ctrl+H ---
+ESP-ROM:esp32c3-api1-20210207
+Build:Feb  7 2021
+rst:0x1 (POWERON),boot:0xd (SPI_FAST_FLASH_BOOT)
+SPIWP:0xee
+mode:DIO, clock div:1
+load:0x3fcd5820,len:0x1738
+load:0x403cc710,len:0xb9c
+load:0x403ce710,len:0x2e4c
+entry 0x403cc71a
+I (30) boot: ESP-IDF v5.3-dirty 2nd stage bootloader
+I (30) boot: compile time Sep  3 2024 09:20:32
+I (30) boot: chip revision: v0.4
+I (34) boot.esp32c3: SPI Speed      : 80MHz
+I (38) boot.esp32c3: SPI Mode       : DIO
+I (43) boot.esp32c3: SPI Flash Size : 2MB
+I (48) boot: Enabling RNG early entropy source...
+I (53) boot: Partition Table:
+I (57) boot: ## Label            Usage          Type ST Offset   Length
+I (64) boot:  0 nvs              WiFi data        01 02 00009000 00006000
+I (72) boot:  1 phy_init         RF data          01 01 0000f000 00001000
+I (79) boot:  2 factory          factory app      00 00 00010000 00100000
+I (86) boot: End of partition table
+I (91) esp_image: segment 0: paddr=00010020 vaddr=3c0a0020 size=2159ch (136604) map
+I (120) esp_image: segment 1: paddr=000315c4 vaddr=3fc91e00 size=02580h (  9600) load
+I (123) esp_image: segment 2: paddr=00033b4c vaddr=40380000 size=0c4cch ( 50380) load
+I (136) esp_image: segment 3: paddr=00040020 vaddr=42000020 size=913a0h (594848) map
+I (229) esp_image: segment 4: paddr=000d13c8 vaddr=4038c4cc size=05850h ( 22608) load
+I (239) boot: Loaded app from partition at offset 0x10000
+I (239) boot: Disabling RNG early entropy source...
+I (251) cpu_start: Unicore app
+I (259) cpu_start: Pro cpu start user code
+I (259) cpu_start: cpu freq: 160000000 Hz
+I (259) app_init: Application information:
+I (262) app_init: Project name:     gatt_client_demo
+I (268) app_init: App version:      1
+I (272) app_init: Compile time:     Sep  3 2024 09:20:24
+I (278) app_init: ELF file SHA256:  2e53c4a18...
+I (284) app_init: ESP-IDF:          v5.3-dirty
+I (289) efuse_init: Min chip rev:     v0.3
+I (293) efuse_init: Max chip rev:     v1.99 
+I (298) efuse_init: Chip rev:         v0.4
+I (303) heap_init: Initializing. RAM available for dynamic allocation:
+I (310) heap_init: At 3FC98A40 len 000275C0 (157 KiB): RAM
+I (317) heap_init: At 3FCC0000 len 0001C710 (113 KiB): Retention RAM
+I (324) heap_init: At 3FCDC710 len 00002950 (10 KiB): Retention RAM
+I (330) heap_init: At 50000200 len 00001DE8 (7 KiB): RTCRAM
+I (338) spi_flash: detected chip: generic
+I (341) spi_flash: flash io: dio
+W (345) spi_flash: Detected size(4096k) larger than the size in the binary image header(2048k). Using the size in the binary image header.
+I (359) sleep: Configure to isolate all GPIO pins in sleep state
+I (365) sleep: Enable automatic switching of GPIO sleep configuration
+I (372) coexist: coex firmware version: dab85ae96
+I (387) coexist: coexist rom version 9387209
+I (387) main_task: Started on CPU0
+I (387) main_task: Calling app_main()
+I (387) BLE_INIT: BT controller compile version [ba3b3e3]
+I (397) BLE_INIT: Bluetooth MAC: 84:fc:e6:01:1a:06
+I (397) phy_init: phy_version 1180,01f2a49,Jun  4 2024,16:34:25
+ --- Entering function: esp_ble_gap_register_callback ---  --- this is function btc_profile_cb_set ---
+ --- this is function esp_ble_gattc_register_callback ---
+ --- this is function btc_profile_cb_set ---
+ --- this is function esp_ble_gattc_app_register --
+I (467) GATTC_DEMO: REG_EVT
+I (477) GATTC_DEMO: scan start success
+I (477) main_task: Returned from app_main()
+I (497) GATTC_DEMO: 8c 79 f5 12 95 53 
+I (497) GATTC_DEMO: searched Adv Data Len 28, Scan Response Len 0
+I (507) GATTC_DEMO: searched Device Name Len 0
+I (507) GATTC_DEMO:  
+I (527) GATTC_DEMO: 60 06 ed af eb f9 
+I (537) GATTC_DEMO: searched Adv Data Len 18, Scan Response Len 21
+I (537) GATTC_DEMO: searched Device Name Len 0
+
+____________________________________
+
+Verbindung mit bluetoothctl, aber ohne pairen:
+[bluetooth]# connect 84:FC:E6:01:1A:06
+Attempting to connect to 84:FC:E6:01:1A:06
+[CHG] Device 84:FC:E6:01:1A:06 Connected: yes
+Connection successful
+[NEW] Primary Service (Handle 0x0000)
+	/org/bluez/hci0/dev_84_FC_E6_01_1A_06/service0001
+	00001801-0000-1000-8000-00805f9b34fb
+	Generic Attribute Profile
+[NEW] Characteristic (Handle 0x0000)
+	/org/bluez/hci0/dev_84_FC_E6_01_1A_06/service0001/char0002
+	00002a05-0000-1000-8000-00805f9b34fb
+	Service Changed
+[NEW] Descriptor (Handle 0x0000)
+	/org/bluez/hci0/dev_84_FC_E6_01_1A_06/service0001/char0002/desc0004
+	00002902-0000-1000-8000-00805f9b34fb
+	Client Characteristic Configuration
+[NEW] Primary Service (Handle 0x0000)
+	/org/bluez/hci0/dev_84_FC_E6_01_1A_06/service0028
+	000000ff-0000-1000-8000-00805f9b34fb
+	Unknown
+[NEW] Characteristic (Handle 0x0000)
+	/org/bluez/hci0/dev_84_FC_E6_01_1A_06/service0028/char0029
+	0000ff01-0000-1000-8000-00805f9b34fb
+	Unknown
+[NEW] Descriptor (Handle 0x0000)
+	/org/bluez/hci0/dev_84_FC_E6_01_1A_06/service0028/char0029/desc002b
+	00002902-0000-1000-8000-00805f9b34fb
+	Client Characteristic Configuration
+[NEW] Primary Service (Handle 0x0000)
+	/org/bluez/hci0/dev_84_FC_E6_01_1A_06/service002c
+	000000ee-0000-1000-8000-00805f9b34fb
+	Unknown
+[NEW] Characteristic (Handle 0x0000)
+	/org/bluez/hci0/dev_84_FC_E6_01_1A_06/service002c/char002d
+	0000ee01-0000-1000-8000-00805f9b34fb
+	Unknown
+[NEW] Descriptor (Handle 0x0000)
+	/org/bluez/hci0/dev_84_FC_E6_01_1A_06/service002c/char002d/desc002f
+	00002902-0000-1000-8000-00805f9b34fb
+	Client Characteristic Configuration
+[CHG] Device 84:FC:E6:01:1A:06 UUIDs: 000000ee-0000-1000-8000-00805f9b34fb
+[CHG] Device 84:FC:E6:01:1A:06 UUIDs: 000000ff-0000-1000-8000-00805f9b34fb
+[CHG] Device 84:FC:E6:01:1A:06 UUIDs: 00001800-0000-1000-8000-00805f9b34fb
+[CHG] Device 84:FC:E6:01:1A:06 UUIDs: 00001801-0000-1000-8000-00805f9b34fb
+[CHG] Device 84:FC:E6:01:1A:06 ServicesResolved: yes
+
+I (387) main_task: Started on CPU0
+I (387) main_task: Calling app_main()
+I (387) BLE_INIT: BT controller compile version [ba3b3e3]
+I (397) BLE_INIT: Bluetooth MAC: 84:fc:e6:01:1a:06
+I (397) phy_init: phy_version 1180,01f2a49,Jun  4 2024,16:34:25
+ --- this is function btc_profile_cb_set ---
+ --- Entering function: esp_ble_gap_register_callback --- 
+ --- this is function btc_profile_cb_set ---
+ --- this is gatts_profile_a_event_handler ---
+I (457) GATTS_DEMO: REGISTER_APP_EVT, status 0, app_id 0
+--- this function is BTM_BleWriteAdvData ---
+W (467) BT_BTM: BTM_BleWriteAdvData, Partial data write into ADV
+--- this function is BTM_BleWriteScanRsp ---
+W (477) BT_BTM: BTM_BleWriteScanRsp, Partial data write into ADV
+ --- this is gatts_profile_a_event_handler ---
+I (487) GATTS_DEMO: CREATE_SERVICE_EVT, status 0,  service_handle 40
+ --- this is gatts_profile_a_event_handler ---
+I (497) GATTS_DEMO: SERVICE_START_EVT, status 0, service_handle 40
+ --- this is gatts_profile_a_event_handler ---
+I (507) GATTS_DEMO: ADD_CHAR_EVT, status 0,  attr_handle 42, service_handle 40
+I (517) GATTS_DEMO: the gatts demo char length = 3
+I (527) GATTS_DEMO: prf_char[0] =11
+I (527) GATTS_DEMO: prf_char[1] =22
+I (527) GATTS_DEMO: prf_char[2] =33
+ --- this is gatts_profile_a_event_handler ---
+I (537) GATTS_DEMO: ADD_DESCR_EVT, status 0, attr_handle 43, service_handle 40
+I (547) GATTS_DEMO: REGISTER_APP_EVT, status 0, app_id 1
+I (557) GATTS_DEMO: CREATE_SERVICE_EVT, status 0,  service_handle 44
+I (557) GATTS_DEMO: SERVICE_START_EVT, status 0, service_handle 44
+I (567) GATTS_DEMO: ADD_CHAR_EVT, status 0,  attr_handle 46, service_handle 44
+I (577) GATTS_DEMO: ADD_DESCR_EVT, status 0, attr_handle 47, service_handle 44
+I (587) main_task: Returned from app_main()
+ --- this is gatts_profile_a_event_handler ---
+I (112077) GATTS_DEMO: ESP_GATTS_CONNECT_EVT, conn_id 0, remote e4:a4:71:f1:24:c5:
+I (112077) GATTS_DEMO: CONNECT_EVT, conn_id 0, remote e4:a4:71:f1:24:c5:
+ --- this is gatts_profile_a_event_handler ---
+I (112127) GATTS_DEMO: ESP_GATTS_MTU_EVT, MTU 500
+I (112127) GATTS_DEMO: ESP_GATTS_MTU_EVT, MTU 500
+I (114087) GATTS_DEMO: update connection params status = 16, min_int = 16, max_int = 32,conn_int = 39,latency = 0, timeout = 42
+W (300447) BT_BTM: btm_sec_clr_temp_auth_service() - no dev CB
+
+E (300447) BT_BTM: Device not found
+
+W (300447) BT_HCI: hcif disc complete: hdl 0x1, rsn 0x13
+
+
+[Rolandos_ESP_Gatt-server]# devices
+Device 84:FC:E6:01:1A:06 Rolandos_ESP_Gatt-server
+[Rolandos_ESP_Gatt-server]# info
+Device 84:FC:E6:01:1A:06 (public)
+	Name: Rolandos_ESP_Gatt-server
+	Alias: Rolandos_ESP_Gatt-server
+	Paired: no
+	Trusted: no
+	Blocked: no
+	Connected: yes
+	LegacyPairing: no
+	UUID: Unknown                   (000000ee-0000-1000-8000-00805f9b34fb)
+	UUID: Unknown                   (000000ff-0000-1000-8000-00805f9b34fb)
+	UUID: Generic Access Profile    (00001800-0000-1000-8000-00805f9b34fb)
+	UUID: Generic Attribute Profile (00001801-0000-1000-8000-00805f9b34fb)
+
+
+
+disconnect befehl:
+@ MGMT Command: Disconnect (0x0014) plen 7                                                                         {0x0001} [hci0] 18.015800
+        LE Address: 84:FC:E6:01:1A:06 (OUI 84-FC-E6)
+< HCI Command: Disconnect (0x01|0x0006) plen 3                                                                           #1 [hci0] 18.015899
+        Handle: 3585
+        Reason: Remote User Terminated Connection (0x13)
+> HCI Event: Command Status (0x0f) plen 4                                                                                #2 [hci0] 18.017483
+      Disconnect (0x01|0x0006) ncmd 1
+        Status: Success (0x00)
+> HCI Event: Disconnect Complete (0x05) plen 4                                                                           #3 [hci0] 18.053072
+        Status: Success (0x00)
+        Handle: 3585
+        Reason: Connection Terminated By Local Host (0x16)
+@ MGMT Event: Command Complete (0x0001) plen 10                                                                    {0x0001} [hci0] 18.053140
+      Disconnect (0x0014) plen 7
+        Status: Success (0x00)
+        LE Address: 84:FC:E6:01:1A:06 (OUI 84-FC-E6)
+
+connect:
+< HCI Command: LE Set Scan Parameters (0x08|0x000b) plen 7                                                               #4 [hci0] 64.808031
+        Type: Passive (0x00)
+        Interval: 60.000 msec (0x0060)
+        Window: 60.000 msec (0x0060)
+        Own address type: Public (0x00)
+        Filter policy: Ignore not in accept list (0x01)
+> HCI Event: Command Complete (0x0e) plen 4                                                                              #5 [hci0] 64.906064
+      LE Set Scan Parameters (0x08|0x000b) ncmd 1
+        Status: Success (0x00)
+< HCI Command: LE Set Scan Enable (0x08|0x000c) plen 2                                                                   #6 [hci0] 64.906167
+        Scanning: Enabled (0x01)
+        Filter duplicates: Enabled (0x01)
+> HCI Event: Command Complete (0x0e) plen 4                                                                              #7 [hci0] 64.908843
+      LE Set Scan Enable (0x08|0x000c) ncmd 2
+        Status: Success (0x00)
+> HCI Event: LE Meta Event (0x3e) plen 41                                                                                #8 [hci0] 64.942400
+      LE Advertising Report (0x02)
+        Num reports: 1
+        Event type: Connectable undirected - ADV_IND (0x00)
+        Address type: Public (0x00)
+        Address: 84:FC:E6:01:1A:06 (OUI 84-FC-E6)
+        Data length: 29
+        Flags: 0x06
+          LE General Discoverable Mode
+          BR/EDR Not Supported
+        Name (complete): Rolandos_ESP_Gatt-server
+        RSSI: -40 dBm (0xd8)
+< HCI Command: LE Set Scan Enable (0x08|0x000c) plen 2                                                                   #9 [hci0] 64.942588
+        Scanning: Disabled (0x00)
+        Filter duplicates: Disabled (0x00)
+> HCI Event: Command Complete (0x0e) plen 4                                                                             #10 [hci0] 64.973815
+      LE Set Scan Enable (0x08|0x000c) ncmd 2
+        Status: Success (0x00)
+< HCI Command: LE Create Connection (0x08|0x000d) plen 25                                                               #11 [hci0] 64.973922
+        Scan interval: 60.000 msec (0x0060)
+        Scan window: 60.000 msec (0x0060)
+        Filter policy: Accept list is not used (0x00)
+        Peer address type: Public (0x00)
+        Peer address: 84:FC:E6:01:1A:06 (OUI 84-FC-E6)
+        Own address type: Public (0x00)
+        Min connection interval: 20.00 msec (0x0010)
+        Max connection interval: 40.00 msec (0x0020)
+        Connection latency: 0 (0x0000)
+        Supervision timeout: 4000 msec (0x0190)
+        Min connection length: 0.000 msec (0x0000)
+        Max connection length: 0.000 msec (0x0000)
+> HCI Event: Command Status (0x0f) plen 4                                                                               #12 [hci0] 64.975799
+      LE Create Connection (0x08|0x000d) ncmd 2
+        Status: Success (0x00)
+> HCI Event: LE Meta Event (0x3e) plen 19                                                                               #13 [hci0] 64.987771
+      LE Connection Complete (0x01)
+        Status: Success (0x00)
+        Handle: 3585
+        Role: Central (0x00)
+        Peer address type: Public (0x00)
+        Peer address: 84:FC:E6:01:1A:06 (OUI 84-FC-E6)
+        Connection interval: 37.50 msec (0x001e)
+        Connection latency: 0 (0x0000)
+        Supervision timeout: 4000 msec (0x0190)
+        Central clock accuracy: 0x00
+@ MGMT Event: Device Connected (0x000b) plen 42                                                                    {0x0001} [hci0] 64.987808
+        LE Address: 84:FC:E6:01:1A:06 (OUI 84-FC-E6)
+        Flags: 0x00000008
+          Connection Locally Initiated
+        Data length: 29
+        Flags: 0x06
+          LE General Discoverable Mode
+          BR/EDR Not Supported
+        Name (complete): Rolandos_ESP_Gatt-server
+< HCI Command: LE Read Remote Used Features (0x08|0x0016) plen 2                                                        #14 [hci0] 64.992022
+        Handle: 3585
+> HCI Event: Command Status (0x0f) plen 4                                                                               #15 [hci0] 64.992781
+      LE Read Remote Used Features (0x08|0x0016) ncmd 1
+        Status: Success (0x00)
+> HCI Event: LE Meta Event (0x3e) plen 12                                                                               #16 [hci0] 65.041439
+      LE Read Remote Used Features (0x04)
+        Status: Success (0x00)
+        Handle: 3585
+        Features: 0x1f 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+          LE Encryption
+          Connection Parameter Request Procedure
+          Extended Reject Indication
+          Peripheral-initiated Features Exchange
+          LE Ping
+< ACL Data TX: Handle 3585 flags 0x00 dlen 7                                                                            #17 [hci0] 65.041812
+      ATT: Exchange MTU Request (0x02) len 2
+        Client RX MTU: 517
+> HCI Event: Number of Completed Packets (0x13) plen 5                                                                  #18 [hci0] 65.079109
+        Num handles: 1
+        Handle: 3585
+        Count: 1
+> ACL Data RX: Handle 3585 flags 0x02 dlen 16                                                                           #19 [hci0] 65.079144
+      LE L2CAP: Connection Parameter Update Request (0x12) ident 2 len 8
+        Min interval: 16
+        Max interval: 32
+        Peripheral latency: 0
+        Timeout multiplier: 400
+@ MGMT Event: New Connection Parameter (0x001c) plen 16                                                            {0x0001} [hci0] 65.079190
+        Store hint: Reserved (0x06)
+        LE Address: 01:84:FC:E6:01:1A (OUI 01-84-FC)
+        Min connection interval: 16
+        Max connection interval: 32
+        Connection latency: 0 (0x0000)
+        Supervision timeout: 400
+< ACL Data TX: Handle 3585 flags 0x00 dlen 10                                                                           #20 [hci0] 65.079201
+      LE L2CAP: Connection Parameter Update Response (0x13) ident 2 len 2
+        Result: Connection Parameters accepted (0x0000)
+< HCI Command: LE Connection Update (0x08|0x0013) plen 14                                                               #21 [hci0] 65.079233
+        Handle: 3585
+        Min connection interval: 20.00 msec (0x0010)
+        Max connection interval: 40.00 msec (0x0020)
+        Connection latency: 0 (0x0000)
+        Supervision timeout: 4000 msec (0x0190)
+        Min connection length: 0.000 msec (0x0000)
+        Max connection length: 0.000 msec (0x0000)
+> HCI Event: Command Status (0x0f) plen 4                                                                               #22 [hci0] 65.080759
+      LE Connection Update (0x08|0x0013) ncmd 1
+        Status: Success (0x00)
+> ACL Data RX: Handle 3585 flags 0x02 dlen 7                                                                            #23 [hci0] 65.116029
+      ATT: Exchange MTU Response (0x03) len 2
+        Server RX MTU: 500
+< ACL Data TX: Handle 3585 flags 0x00 dlen 7                                                                            #24 [hci0] 65.116515
+      ATT: Read Request (0x0a) len 2
+        Handle: 0x0016
+> HCI Event: Number of Completed Packets (0x13) plen 5                                                                  #25 [hci0] 65.116743
+        Num handles: 1
+        Handle: 3585
+        Count: 1
+> HCI Event: Number of Completed Packets (0x13) plen 5                                                                  #26 [hci0] 65.154439
+        Num handles: 1
+        Handle: 3585
+        Count: 1
+> ACL Data RX: Handle 3585 flags 0x02 dlen 27                                                                           #27 [hci0] 65.192451
+> ACL Data RX: Handle 3585 flags 0x01 dlen 2                                                                            #28 [hci0] 65.192457
+      ATT: Read Response (0x0b) len 24
+        Value: 526f6c616e646f735f4553505f476174742d736572766572
+< ACL Data TX: Handle 3585 flags 0x00 dlen 7                                                                            #29 [hci0] 65.192865
+      ATT: Read Request (0x0a) len 2
+        Handle: 0x0018
+> HCI Event: Number of Completed Packets (0x13) plen 5                                                                  #30 [hci0] 65.228384
+        Num handles: 1
+        Handle: 3585
+        Count: 1
+> ACL Data RX: Handle 3585 flags 0x02 dlen 7                                                                            #31 [hci0] 65.267552
+      ATT: Read Response (0x0b) len 2
+        Value: 0000
+< ACL Data TX: Handle 3585 flags 0x00 dlen 11                                                                           #32 [hci0] 65.267924
+      ATT: Read By Type Request (0x08) len 6
+        Handle range: 0x0001-0xffff
+        Attribute type: Server Supported Features (0x2b3a)
+> HCI Event: Number of Completed Packets (0x13) plen 5                                                                  #33 [hci0] 65.302804
+        Num handles: 1
+        Handle: 3585
+        Count: 1
+> ACL Data RX: Handle 3585 flags 0x02 dlen 9                                                                            #34 [hci0] 65.342489
+      ATT: Error Response (0x01) len 4
+        Read By Type Request (0x08)
+        Handle: 0x0001
+        Error: Attribute Not Found (0x0a)
+< ACL Data TX: Handle 3585 flags 0x00 dlen 11                                                                           #35 [hci0] 65.342875
+      ATT: Read By Group Type Request (0x10) len 6
+        Handle range: 0x0001-0xffff
+        Attribute group type: Primary Service (0x2800)
+> HCI Event: Number of Completed Packets (0x13) plen 5                                                                  #36 [hci0] 65.378410
+        Num handles: 1
+        Handle: 3585
+        Count: 1
+> ACL Data RX: Handle 3585 flags 0x02 dlen 27                                                                           #37 [hci0] 65.417193
+> ACL Data RX: Handle 3585 flags 0x01 dlen 3                                                                            #38 [hci0] 65.417199
+      ATT: Read By Group Type Response (0x11) len 25
+        Attribute data length: 6
+        Attribute group list: 4 entries
+        Handle range: 0x0001-0x0005
+        UUID: Generic Attribute Profile (0x1801)
+        Handle range: 0x0014-0x001c
+        UUID: Generic Access Profile (0x1800)
+        Handle range: 0x0028-0x002b
+        UUID: Unknown (0x00ff)
+        Handle range: 0x002c-0xffff
+        UUID: Unknown (0x00ee)
+> HCI Event: LE Meta Event (0x3e) plen 10                                                                               #39 [hci0] 65.417228
+      LE Connection Update Complete (0x03)
+        Status: Success (0x00)
+        Handle: 3585
+        Connection interval: 37.50 msec (0x001e)
+        Connection latency: 0 (0x0000)
+        Supervision timeout: 4000 msec (0x0190)
+< ACL Data TX: Handle 3585 flags 0x00 dlen 9                                                                            #40 [hci0] 65.432253
+      ATT: Write Request (0x12) len 4
+        Handle: 0x0004
+          Data: 0200
+> HCI Event: Number of Completed Packets (0x13) plen 5                                                                  #41 [hci0] 65.453116
+        Num handles: 1
+        Handle: 3585
+        Count: 1
+> ACL Data RX: Handle 3585 flags 0x02 dlen 5                                                                            #42 [hci0] 65.491090
+      ATT: Write Response (0x13) len 0
+
+__________________________________________________________
+
+[84:FC:E6:01:1A:06][LE]> primary
+attr handle: 0x0001, end grp handle: 0x0005 uuid: 00001801-0000-1000-8000-00805f9b34fb
+attr handle: 0x0014, end grp handle: 0x001c uuid: 00001800-0000-1000-8000-00805f9b34fb
+attr handle: 0x0028, end grp handle: 0x002b uuid: 000000ff-0000-1000-8000-00805f9b34fb
+attr handle: 0x002c, end grp handle: 0xffff uuid: 000000ee-0000-1000-8000-00805f9b34fb
+[84:FC:E6:01:1A:06][LE]> included
+No included services found for this range
+[84:FC:E6:01:1A:06][LE]> characteristics
+handle: 0x0002, char properties: 0x20, char value handle: 0x0003, uuid: 00002a05-0000-1000-8000-00805f9b34fb
+handle: 0x0015, char properties: 0x02, char value handle: 0x0016, uuid: 00002a00-0000-1000-8000-00805f9b34fb
+handle: 0x0017, char properties: 0x02, char value handle: 0x0018, uuid: 00002a01-0000-1000-8000-00805f9b34fb
+handle: 0x0019, char properties: 0x02, char value handle: 0x001a, uuid: 00002aa6-0000-1000-8000-00805f9b34fb
+handle: 0x0029, char properties: 0x1a, char value handle: 0x002a, uuid: 0000ff01-0000-1000-8000-00805f9b34fb
+handle: 0x002d, char properties: 0x1a, char value handle: 0x002e, uuid: 0000ee01-0000-1000-8000-00805f9b34fb
+[84:FC:E6:01:1A:06][LE]> char-desc
+handle: 0x0001, uuid: 00002800-0000-1000-8000-00805f9b34fb
+handle: 0x0002, uuid: 00002803-0000-1000-8000-00805f9b34fb
+handle: 0x0003, uuid: 00002a05-0000-1000-8000-00805f9b34fb
+handle: 0x0004, uuid: 00002902-0000-1000-8000-00805f9b34fb
+handle: 0x0014, uuid: 00002800-0000-1000-8000-00805f9b34fb
+handle: 0x0015, uuid: 00002803-0000-1000-8000-00805f9b34fb
+handle: 0x0016, uuid: 00002a00-0000-1000-8000-00805f9b34fb
+handle: 0x0017, uuid: 00002803-0000-1000-8000-00805f9b34fb
+handle: 0x0018, uuid: 00002a01-0000-1000-8000-00805f9b34fb
+handle: 0x0019, uuid: 00002803-0000-1000-8000-00805f9b34fb
+handle: 0x001a, uuid: 00002aa6-0000-1000-8000-00805f9b34fb
+handle: 0x0028, uuid: 00002800-0000-1000-8000-00805f9b34fb
+handle: 0x0029, uuid: 00002803-0000-1000-8000-00805f9b34fb
+handle: 0x002a, uuid: 0000ff01-0000-1000-8000-00805f9b34fb
+handle: 0x002b, uuid: 00002902-0000-1000-8000-00805f9b34fb
+handle: 0x002c, uuid: 00002800-0000-1000-8000-00805f9b34fb
+handle: 0x002d, uuid: 00002803-0000-1000-8000-00805f9b34fb
+handle: 0x002e, uuid: 0000ee01-0000-1000-8000-00805f9b34fb
+handle: 0x002f, uuid: 00002902-0000-1000-8000-00805f9b34fb
+[84:FC:E6:01:1A:06][LE]> char-read-hnd 0x0002
+Characteristic value/descriptor: 20 03 00 05 2a 
+
+--> char-read-hnd 0x0002 gibt characteristic value/Descriptor zurück:
+	Characteristic value/descriptor: 20 03 00 05 2a	//erster Hex-Wert ist "char properties", dann "char value handle", dann uuid das erste Oktett
+	--> handle: 0x0002, char properties: 0x20, char value handle: 0x0003, uuid: 00002a05-0000-1000-8000-00805f9b34fb
+
+alle primary service discovery geben mir zwei Hex-Werte zurück:
+[84:FC:E6:01:1A:06][LE]> primary
+attr handle: 0x0001, end grp handle: 0x0005 uuid: 00001801-0000-1000-8000-00805f9b34fb
+attr handle: 0x0014, end grp handle: 0x001c uuid: 00001800-0000-1000-8000-00805f9b34fb
+attr handle: 0x0028, end grp handle: 0x002b uuid: 000000ff-0000-1000-8000-00805f9b34fb
+attr handle: 0x002c, end grp handle: 0xffff uuid: 000000ee-0000-1000-8000-00805f9b34fb
+[84:FC:E6:01:1A:06][LE]> char-read-hnd 0x0001
+Characteristic value/descriptor: 01 18 
+[84:FC:E6:01:1A:06][LE]> char-read-hnd 0x0014
+Characteristic value/descriptor: 00 18 
+[84:FC:E6:01:1A:06][LE]> char-read-hnd 0x0028
+Characteristic value/descriptor: ff 00 
+[84:FC:E6:01:1A:06][LE]> char-read-hnd 0x002c
+Characteristic value/descriptor: ee 00 
+
+[84:FC:E6:01:1A:06][LE]> char-write-cmd 0x0029 sdfghjk
+[84:FC:E6:01:1A:06][LE]> char-write-cmd 0x0029 sdfghjk
+[84:FC:E6:01:1A:06][LE]> char-write-cmd 0x0014 sdfghjk
+[84:FC:E6:01:1A:06][LE]> char-write-cmd 0x0001 sdfghjk
+[84:FC:E6:01:1A:06][LE]> char-write-cmd 0x0002 sdfghjk
+[84:FC:E6:01:1A:06][LE]> char-write-cmd 0x0003 sdfghjk
+[84:FC:E6:01:1A:06][LE]> char-write-cmd 0x0004 sdfghjk
+[84:FC:E6:01:1A:06][LE]> char-write-cmd 0x0014 sdfghjk
+
+
+E (24062647) BT_GATT: gatts_write_attr_perm_check - GATT_WRITE_NOT_PERMIT,handle:0x0019
+E (24074417) BT_GATT: gatts_write_attr_perm_check - GATT_WRITE_NOT_PERMIT,handle:0x001a
+E (24081437) BT_GATT: gatts_write_attr_perm_check - GATT_WRITE_NOT_PERMIT,handle:0x0028
+E (24088297) BT_GATT: gatts_write_attr_perm_check - GATT_WRITE_NOT_PERMIT,handle:0x0029
+ --- this is gatts_profile_a_event_handler ---
+I (24091067) GATTS_DEMO: GATT_WRITE_EVT, conn_id 0, trans_id 14, handle 42
+I (24091067) GATTS_DEMO: GATT_WRITE_EVT, value len 3, value :
+I (24091077) GATTS_DEMO: 00 0f 00 
+write.need_rsp parameter is False
+E (24096617) BT_GATT: gatts_write_attr_perm_check - GATT_INVALID_ATTR_LEN,handle:0x002b
+E (24101907) BT_GATT: gatts_write_attr_perm_check - GATT_WRITE_NOT_PERMIT,handle:0x002c
+E (24105137) BT_GATT: gatts_write_attr_perm_check - GATT_WRITE_NOT_PERMIT,handle:0x002d
+I (24107567) GATTS_DEMO: GATT_WRITE_EVT, conn_id 0, trans_id 15, handle 46
+I (24107567) GATTS_DEMO: GATT_WRITE_EVT, value len 3, value :
+I (24107577) GATTS_DEMO: 00 0f 00 
+write.need_rsp parameter is False
+E (24111207) BT_GATT: gatts_write_attr_perm_check - GATT_INVALID_ATTR_LEN,handle:0x002f
+
+bloß erlaubt 0x002a:
+I (24091067) GATTS_DEMO: GATT_WRITE_EVT, conn_id 0, trans_id 14, handle 42
+I (24091067) GATTS_DEMO: GATT_WRITE_EVT, value len 3, value :
+I (24091077) GATTS_DEMO: 00 0f 00 
+
+und 2e:
+I (24107567) GATTS_DEMO: GATT_WRITE_EVT, conn_id 0, trans_id 15, handle 46
+I (24107567) GATTS_DEMO: GATT_WRITE_EVT, value len 3, value :
+I (24107577) GATTS_DEMO: 00 0f 00
+
+
+und jetz mit Antwort:
+E (24390327) BT_GATT: gatts_write_attr_perm_check - GATT_WRITE_NOT_PERMIT,handle:0x0019
+E (24399657) BT_GATT: gatts_write_attr_perm_check - GATT_WRITE_NOT_PERMIT,handle:0x0029
+ --- this is gatts_profile_a_event_handler ---
+I (24403447) GATTS_DEMO: GATT_WRITE_EVT, conn_id 0, trans_id 18, handle 42
+I (24403447) GATTS_DEMO: GATT_WRITE_EVT, value len 2, value :
+I (24403457) GATTS_DEMO: 00 0f 
+write.need_rsp parameter is True
+write.need_rsp parameter is False
+ --- this is gatts_profile_a_event_handler ---
+E (24409597) BT_GATT: gatts_write_attr_perm_check - GATT_WRITE_NOT_PERMIT,handle:0x002d
+I (24413277) GATTS_DEMO: GATT_WRITE_EVT, conn_id 0, trans_id 19, handle 46
+I (24413277) GATTS_DEMO: GATT_WRITE_EVT, value len 2, value :
+I (24413277) GATTS_DEMO: 00 0f 
+write.need_rsp parameter is True
+write.need_rsp parameter is False
+
+[84:FC:E6:01:1A:06][LE]> char-write-req 0x002d sdfgh
+Error: Characteristic Write Request failed: Attribute can't be written
+[84:FC:E6:01:1A:06][LE]> char-write-req 0x002e sdfgh
+Characteristic value was written successfully
+
+
