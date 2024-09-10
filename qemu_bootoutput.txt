@@ -1104,9 +1104,79 @@ I (24413277) GATTS_DEMO: 00 0f
 write.need_rsp parameter is True
 write.need_rsp parameter is False
 
-[84:FC:E6:01:1A:06][LE]> char-write-req 0x002d sdfgh
-Error: Characteristic Write Request failed: Attribute can't be written
-[84:FC:E6:01:1A:06][LE]> char-write-req 0x002e sdfgh
+
+
+[84:FC:E6:01:1A:06][LE]> char-write-cmd 0x002e abcdef	---> 
+ --- this is function: btc_gatts_cb_handler ---
+I (53278) BTC_GATTS: BTA_GATTS_WRITE_EVT
+ --- this is function btc_gatts_cb_to_app --- 
+I (53278) GATTS_DEMO: GATT_WRITE_EVT, conn_id 0, trans_id 1, handle 46
+I (53288) GATTS_DEMO: GATT_WRITE_EVT, value len 3, value :
+I (53288) GATTS_DEMO: ab cd ef 
+ --- this is function example_write_event_env ---
+ 
+ 
+[84:FC:E6:01:1A:06][LE]> char-write-req 0x002e abcdef
 Characteristic value was written successfully
+ --- this is function: btc_gatts_cb_handler ---
+I (226378) BTC_GATTS: BTA_GATTS_WRITE_EVT
+ --- this is function btc_gatts_cb_to_app --- 
+I (226378) GATTS_DEMO: GATT_WRITE_EVT, conn_id 0, trans_id 2, handle 46
+I (226388) GATTS_DEMO: GATT_WRITE_EVT, value len 3, value :
+I (226398) GATTS_DEMO: ab cd ef 
+ --- this is function example_write_event_env ---
+write.need_rsp parameter is True
+ --- this is function btc_gatts_cb_to_app ---
+ 
+ 
+[                 ][LE]> connect 84:FC:E6:01:1A:06
+Attempting to connect to 84:FC:E6:01:1A:06
+Connection successful
+
+   --- this is function: btc_gatts_cb_handler ---
+I (32418) BTC_GATTS: BTA_GATTS_CONNECT_EVT
+ --- this is function btc_gatts_cb_to_app --- 
+ --- checkpoint 1 --- 
+ --- this is gatts_profile_a_event_handler ---
+I (32428) GATTS_DEMO: ESP_GATTS_CONNECT_EVT, conn_id 0, remote e4:a4:71:f1:24:c5:
+ --- this is function: btc_gatts_cb_handler ---
+I (32438) BTC_GATTS: BTA_GATTS_CONNECT_EVT
+ --- this is function btc_gatts_cb_to_app --- 
+ --- checkpoint 1 --- 
+I (32448) GATTS_DEMO: CONNECT_EVT, conn_id 0, remote e4:a4:71:f1:24:c5:
+I (34458) GATTS_DEMO: update connection params status = 16, min_int = 16, max_int = 32,conn_int = 30,latency = 0, timeout = 400
+
+
+[84:FC:E6:01:1A:06][LE]> char-write-cmd 0x002e abcdef
+
+ --- this is function: btc_gatts_cb_handler ---
+I (123848) BTC_GATTS: BTA_GATTS_WRITE_EVT
+ --- checkpoint 1 --- 
+ --- checkpoint 2 --- 
+ --- this is function btc_gatts_cb_to_app --- 
+ --- checkpoint 1 --- 
+I (123858) GATTS_DEMO: GATT_WRITE_EVT, conn_id 0, trans_id 1, handle 46
+I (123858) GATTS_DEMO: GATT_WRITE_EVT, value len 3, value :
+I (123868) GATTS_DEMO: ab cd ef 
+ --- this is function example_write_event_env ---
+
+
+[84:FC:E6:01:1A:06][LE]> char-write-req 0x002e abcdef
+Characteristic value was written successfully
+
+ --- this is function: btc_gatts_cb_handler ---
+I (205748) BTC_GATTS: BTA_GATTS_WRITE_EVT
+ --- checkpoint 1 --- 
+ --- checkpoint 2 --- 
+ --- this is function btc_gatts_cb_to_app --- 
+ --- checkpoint 1 --- 
+I (205758) GATTS_DEMO: GATT_WRITE_EVT, conn_id 0, trans_id 2, handle 46
+I (205758) GATTS_DEMO: GATT_WRITE_EVT, value len 3, value :
+I (205768) GATTS_DEMO: ab cd ef 
+ --- this is function example_write_event_env ---
+write.need_rsp parameter is True
+ --- this is function esp_ble_gatts_send_response --- 
+ --- this is function btc_gatts_cb_to_app --- 
+ --- checkpoint 1 --- 
 
 

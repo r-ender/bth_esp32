@@ -17,6 +17,8 @@ The installed tools are not yet added to the PATH environment variable. To make 
 In the terminal where you are going to use ESP-IDF, run:
 . $HOME/esp/esp-idf/export.sh
 
+< kleines Hackerspiel: https://blog.yekki.co.uk/ble-hacking/#Flag_1   https://github.com/hackgnar/ble_ctf >
+
 outüut:
 rolando@RolandoTestPC:~/riscv/esp-idf$ . ./export.sh 
 Setting IDF_PATH to '/home/rolando/riscv/esp-idf'
@@ -1385,7 +1387,247 @@ uint16_t service_handle;           /*!< Service attribute handle */
 		
 		Within a GATT server, the growing values of handles determine the ordered sequence of attributes that a client can access. But gaps between handles are allowed, so a client cannot rely on a contiguous sequence to guess the location of the next attribute. Instead, the client must use the discovery feature (Service and Characteristic Discovery) to obtain the handles of the attributes it is interested in.
 
-woher kommt param->write.value ?		
+
+-------------------------------------------------------------------------------------------
+
+woher kommt param->write.value oder param->reg.app_id?
+
+///Declare the static function
+static void gatts_profile_a_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param);		
+
+aus esp_gatts_api.h :
+
+esp_ble_gatts_cb_param_t ist folgendes typedef union mit structs für jedes einzelne Event:
+/**
+ * @brief Gatt server callback parameters union
+ */
+typedef union {
+    /**
+     * @brief ESP_GATTS_REG_EVT
+     */
+    struct gatts_reg_evt_param {
+        esp_gatt_status_t status;       /*!< Operation status */
+        uint16_t app_id;                /*!< Application id which input in register API */
+    } reg;                              /*!< Gatt server callback param of ESP_GATTS_REG_EVT */
+
+    /**
+     * @brief ESP_GATTS_READ_EVT
+     */
+    struct gatts_read_evt_param {
+        uint16_t conn_id;               /*!< Connection id */
+        uint32_t trans_id;              /*!< Transfer id */
+        esp_bd_addr_t bda;              /*!< The bluetooth device address which been read */
+        uint16_t handle;                /*!< The attribute handle */
+        uint16_t offset;                /*!< Offset of the value, if the value is too long */
+        bool is_long;                   /*!< The value is too long or not */
+        bool need_rsp;                  /*!< The read operation need to do response */
+    } read;                             /*!< Gatt server callback param of ESP_GATTS_READ_EVT */
+
+
+    /**
+     * @brief ESP_GATTS_WRITE_EVT
+     */
+    struct gatts_write_evt_param {
+        uint16_t conn_id;               /*!< Connection id */
+        uint32_t trans_id;              /*!< Transfer id */
+        esp_bd_addr_t bda;              /*!< The bluetooth device address which been written */
+        uint16_t handle;                /*!< The attribute handle */
+        uint16_t offset;                /*!< Offset of the value, if the value is too long */
+        bool need_rsp;                  /*!< The write operation need to do response */
+        bool is_prep;                   /*!< This write operation is prepare write */
+        uint16_t len;                   /*!< The write attribute value length */
+        uint8_t *value;                 /*!< The write attribute value */
+    } write;                            /*!< Gatt server callback param of ESP_GATTS_WRITE_EVT */
+
+    /**
+     * @brief ESP_GATTS_EXEC_WRITE_EVT
+     */
+    struct gatts_exec_write_evt_param {
+        uint16_t conn_id;               /*!< Connection id */
+        uint32_t trans_id;              /*!< Transfer id */
+        esp_bd_addr_t bda;              /*!< The bluetooth device address which been written */
+#define ESP_GATT_PREP_WRITE_CANCEL 0x00 /*!< Prepare write flag to indicate cancel prepare write */
+#define ESP_GATT_PREP_WRITE_EXEC   0x01 /*!< Prepare write flag to indicate execute prepare write */
+        uint8_t exec_write_flag;        /*!< Execute write flag */
+    } exec_write;                       /*!< Gatt server callback param of ESP_GATTS_EXEC_WRITE_EVT */
+
+    /**
+     * @brief ESP_GATTS_MTU_EVT
+     */
+    struct gatts_mtu_evt_param {
+        uint16_t conn_id;               /*!< Connection id */
+        uint16_t mtu;                   /*!< MTU size */
+    } mtu;                              /*!< Gatt server callback param of ESP_GATTS_MTU_EVT */
+
+    /**
+     * @brief ESP_GATTS_CONF_EVT
+     */
+    struct gatts_conf_evt_param {
+        esp_gatt_status_t status;       /*!< Operation status */
+        uint16_t conn_id;               /*!< Connection id */
+        uint16_t handle;                /*!< attribute handle */
+        uint16_t len;                   /*!< The indication or notification value length, len is valid when send notification or indication failed */
+        uint8_t *value;                 /*!< The indication or notification value , value is valid when send notification or indication failed */
+    } conf;                             /*!< Gatt server callback param of ESP_GATTS_CONF_EVT (confirm) */
+
+    /**
+     * @brief ESP_GATTS_UNREG_EVT
+     */
+
+    /**
+     * @brief ESP_GATTS_CREATE_EVT
+     */
+    struct gatts_create_evt_param {
+        esp_gatt_status_t status;       /*!< Operation status */
+        uint16_t service_handle;        /*!< Service attribute handle */
+        esp_gatt_srvc_id_t service_id;  /*!< Service id, include service uuid and other information */
+    } create;                           /*!< Gatt server callback param of ESP_GATTS_CREATE_EVT */
+
+    /**
+     * @brief ESP_GATTS_ADD_INCL_SRVC_EVT
+     */
+    struct gatts_add_incl_srvc_evt_param {
+        esp_gatt_status_t status;       /*!< Operation status */
+        uint16_t attr_handle;           /*!< Included service attribute handle */
+        uint16_t service_handle;        /*!< Service attribute handle */
+    } add_incl_srvc;                    /*!< Gatt server callback param of ESP_GATTS_ADD_INCL_SRVC_EVT */
+
+    /**
+     * @brief ESP_GATTS_ADD_CHAR_EVT
+     */
+    struct gatts_add_char_evt_param {
+        esp_gatt_status_t status;       /*!< Operation status */
+        uint16_t attr_handle;           /*!< Characteristic attribute handle */
+        uint16_t service_handle;        /*!< Service attribute handle */
+        esp_bt_uuid_t char_uuid;        /*!< Characteristic uuid */
+    } add_char;                         /*!< Gatt server callback param of ESP_GATTS_ADD_CHAR_EVT */
+
+    /**
+     * @brief ESP_GATTS_ADD_CHAR_DESCR_EVT
+     */
+    struct gatts_add_char_descr_evt_param {
+        esp_gatt_status_t status;       /*!< Operation status */
+        uint16_t attr_handle;           /*!< Descriptor attribute handle */
+        uint16_t service_handle;        /*!< Service attribute handle */
+        esp_bt_uuid_t descr_uuid;       /*!< Characteristic descriptor uuid */
+    } add_char_descr;                   /*!< Gatt server callback param of ESP_GATTS_ADD_CHAR_DESCR_EVT */
+
+    /**
+     * @brief ESP_GATTS_DELETE_EVT
+     */
+    struct gatts_delete_evt_param {
+        esp_gatt_status_t status;       /*!< Operation status */
+        uint16_t service_handle;        /*!< Service attribute handle */
+    } del;                              /*!< Gatt server callback param of ESP_GATTS_DELETE_EVT */
+
+    /**
+     * @brief ESP_GATTS_START_EVT
+     */
+    struct gatts_start_evt_param {
+        esp_gatt_status_t status;       /*!< Operation status */
+        uint16_t service_handle;        /*!< Service attribute handle */
+    } start;                            /*!< Gatt server callback param of ESP_GATTS_START_EVT */
+
+    /**
+     * @brief ESP_GATTS_STOP_EVT
+     */
+    struct gatts_stop_evt_param {
+        esp_gatt_status_t status;       /*!< Operation status */
+        uint16_t service_handle;        /*!< Service attribute handle */
+    } stop;                             /*!< Gatt server callback param of ESP_GATTS_STOP_EVT */
+
+    /**
+     * @brief ESP_GATTS_CONNECT_EVT
+     */
+    struct gatts_connect_evt_param {
+        uint16_t conn_id;               /*!< Connection id */
+        uint8_t link_role;              /*!< Link role : master role = 0  ; slave role = 1*/
+        esp_bd_addr_t remote_bda;       /*!< Remote bluetooth device address */
+        esp_gatt_conn_params_t conn_params; /*!< current Connection parameters */
+        esp_ble_addr_type_t ble_addr_type;  /*!< Remote BLE device address type */
+        uint16_t conn_handle;           /*!< HCI connection handle */
+    } connect;                          /*!< Gatt server callback param of ESP_GATTS_CONNECT_EVT */
+
+    /**
+     * @brief ESP_GATTS_DISCONNECT_EVT
+     */
+    struct gatts_disconnect_evt_param {
+        uint16_t conn_id;               /*!< Connection id */
+        esp_bd_addr_t remote_bda;       /*!< Remote bluetooth device address */
+        esp_gatt_conn_reason_t reason;  /*!< Indicate the reason of disconnection */
+    } disconnect;                       /*!< Gatt server callback param of ESP_GATTS_DISCONNECT_EVT */
+
+    /**
+     * @brief ESP_GATTS_OPEN_EVT
+     */
+    struct gatts_open_evt_param {
+        esp_gatt_status_t status;       /*!< Operation status */
+    } open;                             /*!< Gatt server callback param of ESP_GATTS_OPEN_EVT */
+
+    /**
+     * @brief ESP_GATTS_CANCEL_OPEN_EVT
+     */
+    struct gatts_cancel_open_evt_param {
+        esp_gatt_status_t status;       /*!< Operation status */
+    } cancel_open;                      /*!< Gatt server callback param of ESP_GATTS_CANCEL_OPEN_EVT */
+
+    /**
+     * @brief ESP_GATTS_CLOSE_EVT
+     */
+    struct gatts_close_evt_param {
+        esp_gatt_status_t status;       /*!< Operation status */
+        uint16_t conn_id;               /*!< Connection id */
+    } close;                            /*!< Gatt server callback param of ESP_GATTS_CLOSE_EVT */
+
+    /**
+     * @brief ESP_GATTS_LISTEN_EVT
+     */
+    /**
+     * @brief ESP_GATTS_CONGEST_EVT
+     */
+    struct gatts_congest_evt_param {
+        uint16_t conn_id;               /*!< Connection id */
+        bool congested;                 /*!< Congested or not */
+    } congest;                          /*!< Gatt server callback param of ESP_GATTS_CONGEST_EVT */
+
+    /**
+     * @brief ESP_GATTS_RESPONSE_EVT
+     */
+    struct gatts_rsp_evt_param {
+        esp_gatt_status_t status;       /*!< Operation status */
+        uint16_t handle;                /*!< Attribute handle which send response */
+    } rsp;                              /*!< Gatt server callback param of ESP_GATTS_RESPONSE_EVT */
+
+    /**
+     * @brief ESP_GATTS_CREAT_ATTR_TAB_EVT
+     */
+    struct gatts_add_attr_tab_evt_param{
+        esp_gatt_status_t status;       /*!< Operation status */
+        esp_bt_uuid_t svc_uuid;         /*!< Service uuid type */
+        uint8_t svc_inst_id;            /*!< Service id */
+        uint16_t num_handle;            /*!< The number of the attribute handle to be added to the gatts database */
+        uint16_t *handles;              /*!< The number to the handles */
+    } add_attr_tab;                     /*!< Gatt server callback param of ESP_GATTS_CREAT_ATTR_TAB_EVT */
+
+
+   /**
+    * @brief ESP_GATTS_SET_ATTR_VAL_EVT
+    */
+    struct gatts_set_attr_val_evt_param{
+        uint16_t srvc_handle;           /*!< The service handle */
+        uint16_t attr_handle;           /*!< The attribute  handle */
+        esp_gatt_status_t status;       /*!< Operation status*/
+    } set_attr_val;                     /*!< Gatt server callback param of ESP_GATTS_SET_ATTR_VAL_EVT */
+
+    /**
+    * @brief ESP_GATTS_SEND_SERVICE_CHANGE_EVT
+    */
+    struct gatts_send_service_change_evt_param{
+        esp_gatt_status_t status;       /*!< Operation status*/
+    } service_change;                    /*!< Gatt server callback param of ESP_GATTS_SEND_SERVICE_CHANGE_EVT */
+
+} esp_ble_gatts_cb_param_t;
+
 
 /* write request data */
 typedef struct {
@@ -1398,7 +1640,12 @@ typedef struct {
 } tGATT_WRITE_REQ;
 
 
+
+
+
 vermutlich aus btc_gatts.c :
+
+in Funktion void btc_gatts_cb_handler(btc_msg_t *msg) kommt vor:
 case BTA_GATTS_WRITE_EVT: {
         gatts_if = BTC_GATT_GET_GATT_IF(p_data->req_data.conn_id);
         param.write.conn_id = BTC_GATT_GET_CONN_ID(p_data->req_data.conn_id);
@@ -1417,5 +1664,76 @@ case BTA_GATTS_WRITE_EVT: {
         btc_gatts_cb_to_app(ESP_GATTS_WRITE_EVT, gatts_if, &param);
 
 
-	next: Debuggen um Verständnis für Funktionen zu erhalten!
+
+param.write.value = p_data->req_data.p_data->write_req.value;  --> woher kommt p_data ? --> aus tBTA_GATTS *p_data = (tBTA_GATTS *)msg->arg;
+
+
+	next: Debuggen um Verständnis für Funktionen zu erhalten! --> möglich mit raspi (siehe pdf) aber zu umständlich, darum versuchen mit Logs weiterzukommen!
+	
+	
+	
+	
+[84:FC:E6:01:1A:06][LE]> char-write-cmd 0x002e abcdef	---> 
+ --- this is function: btc_gatts_cb_handler ---
+I (53278) BTC_GATTS: BTA_GATTS_WRITE_EVT
+ --- this is function btc_gatts_cb_to_app --- 
+I (53278) GATTS_DEMO: GATT_WRITE_EVT, conn_id 0, trans_id 1, handle 46
+I (53288) GATTS_DEMO: GATT_WRITE_EVT, value len 3, value :
+I (53288) GATTS_DEMO: ab cd ef 
+ --- this is function example_write_event_env ---
+ 
+ 
+ 
+ I (183768) BTC_GATTS: BTA_GATTS_WRITE_EVT aufgedröselt ergibt:
+ 	gatts_if = BTC_GATT_GET_GATT_IF(p_data->req_data.conn_id);	// aus bt/host/bluedroid/btc/profile/std/include/btc_gatt_util.h:
+ 									   #define BTC_GATT_GET_GATT_IF(conn_id)  ((uint8_t)(conn_id))
+ 	
+ 	
+        param.write.conn_id = BTC_GATT_GET_CONN_ID(p_data->req_data.conn_id);	//btc_gatt_util.h:BTC_GATT_GET_CONN_ID(conn_id)  (((uint16_t)(conn_id)) >> 8)
+        param.write.trans_id = p_data->req_data.trans_id;
+        memcpy(param.write.bda, p_data->req_data.remote_bda, ESP_BD_ADDR_LEN);	//kopiere bluetooth-destination-address von p_data zu param
+        if (p_data->req_data.p_data == NULL) {
+            break;
+        }
+        param.write.handle = p_data->req_data.p_data->write_req.handle;
+        param.write.offset = p_data->req_data.p_data->write_req.offset;
+        param.write.need_rsp = p_data->req_data.p_data->write_req.need_rsp;
+        param.write.is_prep = p_data->req_data.p_data->write_req.is_prep;
+        param.write.len = p_data->req_data.p_data->write_req.len;
+        param.write.value = p_data->req_data.p_data->write_req.value;
+
+        btc_gatts_cb_to_app(ESP_GATTS_WRITE_EVT, gatts_if, &param);	--->
+		/**
+		 * @brief           This function is called to send a response to a request.
+		 *
+		 * @param[in]       gatts_if: GATT server access interface
+		 * @param[in]       conn_id - connection identifier.
+		 * @param[in]       trans_id - transfer id
+		 * @param[in]       status - response status
+		 * @param[in]       rsp - response data.
+		 *
+		 * @return
+		 *                  - ESP_OK : success
+		 *                  - other  : failed
+		 *
+		 */
+		esp_err_t esp_ble_gatts_send_response(esp_gatt_if_t gatts_if, uint16_t conn_id, uint32_t trans_id, esp_gatt_status_t status, esp_gatt_rsp_t *rsp);
+ 		
+ 
+ 
+  --- this is function: btc_gatts_cb_handler ---
+I (51448) BTC_GATTS: BTA_GATTS_WRITE_EVT
+ --- checkpoint 1 --- 
+ --- checkpoint 2 --- 
+ --- this is function btc_gatts_cb_to_app --- 
+ --- checkpoint 1 --- 
+I (51458) GATTS_DEMO: GATT_WRITE_EVT, conn_id 0, trans_id 1, handle 46
+I (51468) GATTS_DEMO: GATT_WRITE_EVT, value len 3, value :
+I (51468) GATTS_DEMO: ab cd ef 
+ --- this is function example_write_event_env ---
+ --- this is function: btc_gatts_cb_handler ---
+ 
+ Unterschiedliche Callbacks:  cb_handler und cb_to_app
+ 
+ 	--> ACHTUNG Profile B !!
 	
