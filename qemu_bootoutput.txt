@@ -1180,3 +1180,29 @@ write.need_rsp parameter is True
  --- checkpoint 1 --- 
 
 
+nach löschen von profile B:
+[84:FC:E6:01:1A:06][LE]> char-write-cmd 0x002a abcdef
+
+ --- this is function: btc_gatts_cb_handler ---
+I (257498) BTC_GATTS: BTA_GATTS_WRITE_EVT
+ --- checkpoint 1 --- 
+ --- checkpoint 2 --- 
+ --- this is function btc_gatts_cb_to_app --- 
+ --- checkpoint 1 --- 
+ --- this is gatts_profile_a_event_handler ---
+I (257508) GATTS_DEMO: GATT_WRITE_EVT, conn_id 0, trans_id 4, handle 42
+I (257518) GATTS_DEMO: GATT_WRITE_EVT, value len 3, value :
+I (257528) GATTS_DEMO:  --- the message we received is: 0x3fc9b112 ---
+
+ --- CHECK 1 ---
+ --- CHECK 2 ---
+ --- eins vor example_write_event_env ---
+ --- this is function example_write_event_env ---
+
+(bei allen anderen writes:
+E (154448) BT_GATT: gatts_write_attr_perm_check - GATT_WRITE_NOT_PERMIT,handle:0x0014
+E (158908) BT_GATT: gatts_write_attr_perm_check - GATT_WRITE_NOT_PERMIT,handle:0x0015
+E (161908) BT_GATT: gatts_write_attr_perm_check - GATT_WRITE_NOT_PERMIT,handle:0x0016
+E (165138) BT_GATT: gatts_write_attr_perm_check - GATT_WRITE_NOT_PERMIT,handle:0x0017
+
+herausfinden, wie man service attributes permissions und properties anpasst !

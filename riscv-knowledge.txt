@@ -1721,19 +1721,147 @@ I (53288) GATTS_DEMO: ab cd ef
  		
  
  
-  --- this is function: btc_gatts_cb_handler ---
-I (51448) BTC_GATTS: BTA_GATTS_WRITE_EVT
- --- checkpoint 1 --- 
- --- checkpoint 2 --- 
- --- this is function btc_gatts_cb_to_app --- 
- --- checkpoint 1 --- 
-I (51458) GATTS_DEMO: GATT_WRITE_EVT, conn_id 0, trans_id 1, handle 46
-I (51468) GATTS_DEMO: GATT_WRITE_EVT, value len 3, value :
-I (51468) GATTS_DEMO: ab cd ef 
- --- this is function example_write_event_env ---
- --- this is function: btc_gatts_cb_handler ---
- 
  Unterschiedliche Callbacks:  cb_handler und cb_to_app
  
- 	--> ACHTUNG Profile B !!
+
+Ausgabe aufdröseln:
+
+Initialisierungsprozess:
+
+I (388) main_task: Calling app_main()
+I (388) BLE_INIT: BT controller compile version [ba3b3e3]
+I (398) BLE_INIT: Bluetooth MAC: 84:fc:e6:01:1a:06
+I (398) phy_init: phy_version 1180,01f2a49,Jun  4 2024,16:34:25
+--- before esp_ble_gatts_register_callback(gatts_event_handler) ---
+ --- this is function btc_profile_cb_set ---
+--- after esp_ble_gatts_register_callback(gatts_event_handler) ---
+--- before esp_ble_gap_register_callback(gap_event_handler) ---
+ --- Entering function: esp_ble_gap_register_callback --- 
+ --- this is function btc_profile_cb_set ---
+--- after esp_ble_gap_register_callback(gap_event_handler) ---
+--- before esp_ble_gatts_app_register(PROFILE_A_APP_ID) ---
+ --- this is function: btc_gatts_cb_handler ---
+I (488) BTC_GATTS: BTA_GATTS_REG_EVT
+ --- this is function btc_gatts_cb_to_app --- 
+ --- checkpoint 1 --- 
+ --- this is gatts_profile_a_event_handler ---
+I (498) GATTS_DEMO: REGISTER_APP_EVT, status 0, app_id 0	//app-id=0 ==> Profile A
+--- this function is BTM_BleWriteAdvData ---
+W (508) BT_BTM: BTM_BleWriteAdvData, Partial data write into ADV
+--- this function is BTM_BleWriteScanRsp ---
+W (518) BT_BTM: BTM_BleWriteScanRsp, Partial data write into ADV
+ --- this is function: btc_gatts_cb_handler ---
+I (528) BTC_GATTS: BTA_GATTS_CREATE_EVT
+ --- this is function btc_gatts_cb_to_app --- 
+ --- checkpoint 1 --- 
+ --- this is gatts_profile_a_event_handler ---
+I (548) GATTS_DEMO: CREATE_SERVICE_EVT, status 0,  service_handle 40	//service_handle 40 = 0x28
+ --- this is function: btc_gatts_cb_handler ---
+I (558) BTC_GATTS: BTA_GATTS_START_EVT
+ --- this is function btc_gatts_cb_to_app --- 
+ --- checkpoint 1 --- 
+ --- this is gatts_profile_a_event_handler ---
+I (568) GATTS_DEMO: SERVICE_START_EVT, status 0, service_handle 40
+ --- this is function: btc_gatts_cb_handler ---
+I (588) BTC_GATTS: BTA_GATTS_ADD_CHAR_EVT
+ --- this is function btc_gatts_cb_to_app --- 
+ --- checkpoint 1 --- 
+ --- this is gatts_profile_a_event_handler ---
+I (598) GATTS_DEMO: ADD_CHAR_EVT, status 0,  attr_handle 42, service_handle 40
+							// Characteristic attribute handle 42 = 0x2a, Service attribute handle 40 = 0x28
+--- this is function esp_ble_gatts_get_attr_value --
+--- current value length: 1070225862 ---
+I (618) GATTS_DEMO: the gatts demo char length = 3  //woher length ? --> nach vielen Unterfunktionen wird das aus database gelesen 
+								( *length = p_cur->p_value->attr_val.attr_len )
+					bta_gatts_get_attr_value --> GATTS_GetAttributeValue --> gatts_get_attribute_value  
+					( attr_handle: the attribute handle, length: the attribute value length, 
+	  				value: the pointer to the data to be get to the attribute value in the database
+
+I (618) GATTS_DEMO: prf_char[0] =11	////bedeutet wohl pointer_for_characteristic oder so
+I (628) GATTS_DEMO: prf_char[1] =22
+I (628) GATTS_DEMO: prf_char[2] =33
+ --- this is function: btc_gatts_cb_handler ---
+I (638) BTC_GATTS: BTA_GATTS_ADD_CHAR_DESCR_EVT
+ --- this is function btc_gatts_cb_to_app --- 
+ --- checkpoint 1 --- 
+ --- this is gatts_profile_a_event_handler ---
+I (648) GATTS_DEMO: ADD_DESCR_EVT, status 0, attr_handle 43, service_handle 40	// param->add_char_descr.attr_handle;
+--- after esp_ble_gatts_app_register(PROFILE_A_APP_ID) ---
+--- before esp_ble_gatt_set_local_mtu ---
+--- after esp_ble_gatt_set_local_mtu ---
+I (678) main_task: Returned from app_main()
+
+
+--> Ablauf:  Registriere GATT-Server als Application Profile -> Create Service -> Start Service -> Add Characteristic to service -> add charact. descriptor
+
+
+
+connect-prozess:
+
+[                 ][LE]> connect 84:FC:E6:01:1A:06
+Attempting to connect to 84:FC:E6:01:1A:06
+Connection successful
+
+ --- this is function: btc_gatts_cb_handler ---
+I (87768) BTC_GATTS: BTA_GATTS_CONNECT_EVT
+
+	--> paramtere festgelegt: gatts_if = p_data->conn.server_if;
+        param.connect.conn_id = BTC_GATT_GET_CONN_ID(p_data->conn.conn_id);
+        ...
+        und am Ende callen von btc_gatts_cb_to_app(ESP_GATTS_CONNECT_EVT, gatts_if, &param) , was dann zu profile-handler führt
+	
+ --- this is function btc_gatts_cb_to_app --- 
+ --- checkpoint 1 --- 
+ --- this is gatts_profile_a_event_handler ---
+I (87778) GATTS_DEMO: ESP_GATTS_CONNECT_EVT, conn_id 0, remote e4:a4:71:f1:24:c5:	//parameter werden übernommen wie zb bt_address, 
+							und an esp_ble_gap_update_conn_params übergeben
+I (89788) GATTS_DEMO: update connection params status = 16, min_int = 16, max_int = 32,conn_int = 30,latency = 0, timeout = 400
+		// aus ESP_GAP_BLE_UPDATE_CONN_PARAMS_EVT, bloß printen
+
+
+
+send/write-Process:
+[84:FC:E6:01:1A:06][LE]> char-write-cmd 0x002a abcdef
+
+ --- this is function: btc_gatts_cb_handler ---
+I (135848) BTC_GATTS: BTA_GATTS_WRITE_EVT	
+		// zuweisen verschiedener Ids, Bda etc.
+		gatts_if = BTC_GATT_GET_GATT_IF(p_data->req_data.conn_id);
+		param.write.conn_id = BTC_GATT_GET_CONN_ID(p_data->req_data.conn_id);
+		param.write.trans_id = p_data->req_data.trans_id;
+		memcpy(param.write.bda, p_data->req_data.remote_bda, ESP_BD_ADDR_LEN);
+ 		... 
+	 	 param.write.len = p_data->req_data.p_data->write_req.len;
+		 param.write.value = p_data->req_data.p_data->write_req.value;
+ --- checkpoint 1 --- 
+ --- this is function btc_gatts_cb_to_app --- 
+ --- checkpoint 1 --- 
+ --- this is gatts_profile_a_event_handler ---
+I (135858) GATTS_DEMO: GATT_WRITE_EVT, conn_id 0, trans_id 1, handle 42
+I (135868) GATTS_DEMO: GATT_WRITE_EVT, value len 3, value :
+I (135878) GATTS_DEMO:  --- the message we received is: 0x3fc9b112 ---
+
+ --- CHECK 1 ---
+ --- CHECK 2 ---
+ --- eins vor example_write_event_env ---
+ --- this is function example_write_event_env ---
+ 	if (param->write.is_prep) in diesem Fall false, darum Ende
+
+
+< zur Erinnerung:
+The Generic Access Profile (GAP) is the cornerstone that allows Bluetooth Low Energy
+devices to interoperate with each other. It provides a framework that any BLE imple‐
+mentation must follow to allow devices to discover each other, broadcast data, establish
+secure connections, and perform many other fundamental operations in a standard,
+universally understood manner.
+
+In contrast with GAP which defines the low-level interactions with devices, GATT deals only with actual data transfer pro‐
+cedures and formats.
+GATT uses the Attribute Protocol (detailed in “Attribute Protocol (ATT)” on page 26) as its transport protocol to exchange data between devices.
+This data is organized hierarchically in sections called services, which group conceptually related pieces of user data called characteristics.
+>
+
+ next: herausfinden, warum Fehler wie:
+ E (95348) BT_GATT: gatts_write_attr_perm_check - GATT_WRITE_NOT_PERMIT,handle:0x0003
+auftreten	
 	
